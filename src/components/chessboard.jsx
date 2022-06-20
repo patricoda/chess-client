@@ -2,10 +2,18 @@ const COLUMN_VALUES = "abcdefgh";
 
 const renderCellContents = (data) => {
   switch (data) {
-    case 0:
-      return <i>0</i>;
-    case 1:
-      return <i>p</i>;
+    case "r":
+      return <i>R</i>;
+    case "kn":
+      return <i>Kn</i>;
+    case "b":
+      return <i>B</i>;
+    case "k":
+      return <i>K</i>;
+    case "q":
+      return <i>Q</i>;
+    case "p":
+      return <i>P</i>;
   }
 };
 

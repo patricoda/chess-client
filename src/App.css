@@ -4,9 +4,15 @@
 }
 
 .chessboard {
-  height: 600px;
-  width: 600px;
+  height: 640px;
+  width: 640px;
   border-collapse: collapse;
+}
+
+.chessboard td {
+  text-align: center;
+  height: 80px;
+  width: 80px;
 }
 
 .chessboard tr:nth-child(odd) td:nth-child(odd) {
@@ -23,4 +29,8 @@
 
 .chessboard tr:nth-child(even) td:nth-child(odd) {
   background-color: black;
+}
+
+i {
+  color: red;
 }
