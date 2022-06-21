@@ -31,6 +31,11 @@
   background-color: black;
 }
 
-i {
-  color: red;
+i.white {
+  text-shadow: cadetblue;
+  color: white;
+}
+
+i.black {
+  color: black;
 }
