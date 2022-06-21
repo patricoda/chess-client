@@ -1,8 +1,10 @@
+import { immerable } from "immer";
 import Tile from "./tile";
 
 const COLUMN_VALUES = "abcdefgh";
 
 export default class BoardState {
+  [immerable] = true;
   columnsLength = 8;
   rowsLength = 8;
   tiles = [];

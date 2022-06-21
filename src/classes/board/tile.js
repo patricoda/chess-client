@@ -1,14 +1,17 @@
+import { immerable } from "immer";
+
 export default class Tile {
-  file;
-  rank;
+  [immerable] = true;
+  column;
+  row;
   contents;
 
-  constructor(file, rank) {
-    this.file = file;
-    this.rank = rank;
+  constructor(column, row) {
+    this.column = column;
+    this.row = row;
   }
 
   get coords() {
-    return `${this.file + this.rank}`;
+    return `${this.column + this.row}`;
   }
 }

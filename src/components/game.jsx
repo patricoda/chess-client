@@ -1,4 +1,5 @@
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useReducer } from "react";
+import produce from "immer";
 import BoardState from "../classes/board/boardState";
 import Chessboard from "./chessboard";
 import Piece from "../classes/piece";
@@ -57,21 +58,41 @@ const setPieces = (boardState) => {
   boardState.tiles[7][7].contents = new Piece(allegiance.WHITE, type.ROOK);
 };
 
+const boardReducer = produce((state, action) => {
+  switch (action.type) {
+    case "SET_BOARD":
+      setPieces(state);
+      return state;
+    case "MOVE_PIECE":
+      const tiles = state.tiles;
+      const sourceTile = tiles[tiles.length - action.sourceTile.row].find(
+        (tile) => tile.column === action.sourceTile.column
+      );
+      const destinationTile = tiles[
+        tiles.length - action.destinationTile.row
+      ].find((tile) => tile.column === action.destinationTile.column);
+
+      destinationTile.contents = sourceTile.contents;
+      sourceTile.contents = null;
+
+      return state;
+    default:
+      return state;
+  }
+});
+
 const Game = () => {
-  const [boardState, setBoardState] = useState(defaultGameState);
+  const [boardState, dispatch] = useReducer(boardReducer, defaultGameState);
 
-  const onClickHandler = useCallback((e) => {
-    console.log(e);
-
-    //get the tile that was clicked
-    //get the tile on release
-    //amend contents
-    // setBoardState(() => ({ ...boardState }));
+  const onDropHandler = useCallback((sourceTile, dropTile) => {
+    dispatch({ type: "MOVE_PIECE", sourceTile, destinationTile: dropTile });
   }, []);
 
-  setPieces(boardState);
+  useEffect(() => {
+    dispatch({ type: "SET_BOARD" });
+  }, []);
 
-  return <Chessboard boardState={boardState} clickHandler={onClickHandler} />;
+  return <Chessboard boardState={boardState} dropHandler={onDropHandler} />;
 };
 
 export default memo(Game);

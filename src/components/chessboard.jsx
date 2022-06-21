@@ -1,13 +1,8 @@
-import React, { useRef } from "react";
-import { DraggableCore } from "react-draggable";
+import { useDrag, useDrop } from "react-dnd";
 
-const Pawn = ({ allegiance, nodeRef, ...props }) => {
+const Pawn = ({ allegiance, ...props }) => {
   return (
-    <i
-      ref={nodeRef}
-      className={allegiance === "WHITE" ? "white" : "black"}
-      {...props}
-    >
+    <i className={allegiance === "WHITE" ? "white" : "black"} {...props}>
       P
     </i>
   );
@@ -52,41 +47,40 @@ const renderTileContents = (tile) => {
   }
 };
 
-const Tile = ({ tile, clickHandler }) => {
-  const nodeRef = React.useRef(null);
+const Tile = ({ tile, dropHandler }) => {
+  const [, drag] = useDrag(() => ({
+    type: "PIECE",
+    item: tile
+  }));
+
+  const [, drop] = useDrop(() => ({
+    accept: "PIECE",
+    drop: (item) => dropHandler(item, tile)
+  }));
 
   return (
-    <DraggableCore
-      nodeRef={nodeRef}
-      onStart={() => {
-        return clickHandler(tile);
-      }}
-      onStop={() => clickHandler(tile)}
-    >
-      <td ref={nodeRef} id={`${tile.coords}`}>
-        {renderTileContents(tile, clickHandler)}
-      </td>
-    </DraggableCore>
+    <td ref={(node) => drag(drop(node))} id={`${tile.coords}`}>
+      {renderTileContents(tile)}
+    </td>
   );
 };
 
-const Row = ({ index, tiles, clickHandler }) => {
-  const rowId = index + 1;
+const Row = ({ tiles, ...props }) => {
   return (
-    <tr id={rowId}>
+    <tr>
       {tiles.map((tile) => (
-        <Tile tile={tile} clickHandler={clickHandler} />
+        <Tile key={tile.coords} tile={tile} {...props} />
       ))}
     </tr>
   );
 };
 
-const Board = ({ boardState, clickHandler }) => {
+const Board = ({ boardState, ...props }) => {
   return (
     <table className="chessboard">
       <tbody>
         {boardState.tiles.map((tiles, i) => (
-          <Row index={i} tiles={tiles} clickHandler={clickHandler} />
+          <Row key={i} tiles={tiles} {...props} />
         ))}
       </tbody>
     </table>
