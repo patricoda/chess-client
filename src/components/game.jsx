@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import BoardState from "../classes/board/boardState";
 import Chessboard from "./chessboard";
 import Piece from "../classes/piece";
@@ -17,9 +17,9 @@ const type = Object.freeze({
   KNIGHT: "KNIGHT"
 });
 
-const defaultGameState = {};
+const defaultGameState = new BoardState();
 
-const setBoardState = (boardState) => {
+const setPieces = (boardState) => {
   boardState.tiles[0][0].contents = new Piece(allegiance.BLACK, type.ROOK);
   boardState.tiles[0][1].contents = new Piece(allegiance.BLACK, type.KNIGHT);
   boardState.tiles[0][2].contents = new Piece(allegiance.BLACK, type.BISHOP);
@@ -58,12 +58,20 @@ const setBoardState = (boardState) => {
 };
 
 const Game = () => {
-  const boardState = new BoardState();
-  const [gameState, setGameState] = useState(defaultGameState);
+  const [boardState, setBoardState] = useState(defaultGameState);
 
-  setBoardState(boardState);
+  const onClickHandler = useCallback((e) => {
+    console.log(e);
 
-  return <Chessboard boardState={boardState} />;
+    //get the tile that was clicked
+    //get the tile on release
+    //amend contents
+    // setBoardState(() => ({ ...boardState }));
+  }, []);
+
+  setPieces(boardState);
+
+  return <Chessboard boardState={boardState} clickHandler={onClickHandler} />;
 };
 
 export default memo(Game);

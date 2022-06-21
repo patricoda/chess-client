@@ -1,6 +1,17 @@
-const Pawn = ({ allegiance }) => (
-  <i className={allegiance === "WHITE" ? "white" : "black"}>P</i>
-);
+import React, { useRef } from "react";
+import { DraggableCore } from "react-draggable";
+
+const Pawn = ({ allegiance, nodeRef, ...props }) => {
+  return (
+    <i
+      ref={nodeRef}
+      className={allegiance === "WHITE" ? "white" : "black"}
+      {...props}
+    >
+      P
+    </i>
+  );
+};
 
 const Rook = ({ allegiance }) => (
   <i className={allegiance === "WHITE" ? "white" : "black"}>R</i>
@@ -22,42 +33,60 @@ const Queen = ({ allegiance }) => (
   <i className={allegiance === "WHITE" ? "white" : "black"}>Q</i>
 );
 
-const renderTileContents = (contents) => {
-  switch (contents?.type) {
+const renderTileContents = (tile) => {
+  switch (tile.contents?.type) {
     case "PAWN":
-      return <Pawn allegiance={contents.allegiance} />;
+      return <Pawn allegiance={tile.contents.allegiance} />;
     case "ROOK":
-      return <Rook allegiance={contents.allegiance} />;
+      return <Rook allegiance={tile.contents.allegiance} />;
     case "KNIGHT":
-      return <Knight allegiance={contents.allegiance} />;
+      return <Knight allegiance={tile.contents.allegiance} />;
     case "BISHOP":
-      return <Bishop allegiance={contents.allegiance} />;
+      return <Bishop allegiance={tile.contents.allegiance} />;
     case "KING":
-      return <King allegiance={contents.allegiance} />;
+      return <King allegiance={tile.contents.allegiance} />;
     case "QUEEN":
-      return <Queen allegiance={contents.allegiance} />;
+      return <Queen allegiance={tile.contents.allegiance} />;
     default:
       return <></>;
   }
 };
 
-const Row = ({ index, tiles }) => {
+const Tile = ({ tile, clickHandler }) => {
+  const nodeRef = React.useRef(null);
+
+  return (
+    <DraggableCore
+      nodeRef={nodeRef}
+      onStart={() => {
+        return clickHandler(tile);
+      }}
+      onStop={() => clickHandler(tile)}
+    >
+      <td ref={nodeRef} id={`${tile.coords}`}>
+        {renderTileContents(tile, clickHandler)}
+      </td>
+    </DraggableCore>
+  );
+};
+
+const Row = ({ index, tiles, clickHandler }) => {
   const rowId = index + 1;
   return (
     <tr id={rowId}>
       {tiles.map((tile) => (
-        <td id={`${tile.coords}`}>{renderTileContents(tile.contents)}</td>
+        <Tile tile={tile} clickHandler={clickHandler} />
       ))}
     </tr>
   );
 };
 
-const Board = ({ boardState }) => {
+const Board = ({ boardState, clickHandler }) => {
   return (
     <table className="chessboard">
       <tbody>
         {boardState.tiles.map((tiles, i) => (
-          <Row index={i} tiles={tiles} />
+          <Row index={i} tiles={tiles} clickHandler={clickHandler} />
         ))}
       </tbody>
     </table>
