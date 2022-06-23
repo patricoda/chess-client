@@ -16,26 +16,17 @@
 }
 
 .chessboard tr:nth-child(odd) td:nth-child(odd) {
-  background-color: white;
+  background-color: wheat;
 }
 
 .chessboard tr:nth-child(odd) td:nth-child(even) {
-  background-color: black;
+  background-color: olivedrab;
 }
 
-.chessboard tr:nth-child(even) td:nth-child(even) {
-  background-color: white;
+tr:nth-child(even) td:nth-child(even) {
+  background-color: wheat;
 }
 
-.chessboard tr:nth-child(even) td:nth-child(odd) {
-  background-color: black;
-}
-
-i.white {
-  text-shadow: cadetblue;
-  color: white;
-}
-
-i.black {
-  color: black;
+tr:nth-child(even) td:nth-child(odd) {
+  background-color: olivedrab;
 }

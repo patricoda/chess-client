@@ -1,32 +1,55 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChessKing,
+  faChessQueen,
+  faChessBishop,
+  faChessRook,
+  faChessKnight,
+  faChessPawn
+} from "@fortawesome/free-solid-svg-icons";
 import { useDrag, useDrop } from "react-dnd";
 
-const Pawn = ({ allegiance, ...props }) => {
-  return (
-    <i className={allegiance === "WHITE" ? "white" : "black"} {...props}>
-      P
-    </i>
+const Pawn = ({ allegiance }) =>
+  allegiance === "WHITE" ? (
+    <FontAwesomeIcon icon={faChessPawn} inverse size="3x" />
+  ) : (
+    <FontAwesomeIcon icon={faChessPawn} size="3x" />
   );
-};
 
-const Rook = ({ allegiance }) => (
-  <i className={allegiance === "WHITE" ? "white" : "black"}>R</i>
-);
+const Rook = ({ allegiance }) =>
+  allegiance === "WHITE" ? (
+    <FontAwesomeIcon icon={faChessRook} inverse size="3x" />
+  ) : (
+    <FontAwesomeIcon icon={faChessRook} size="3x" />
+  );
 
-const Knight = ({ allegiance }) => (
-  <i className={allegiance === "WHITE" ? "white" : "black"}>Kn</i>
-);
+const Knight = ({ allegiance }) =>
+  allegiance === "WHITE" ? (
+    <FontAwesomeIcon icon={faChessKnight} inverse size="3x" />
+  ) : (
+    <FontAwesomeIcon icon={faChessKnight} size="3x" />
+  );
 
-const Bishop = ({ allegiance }) => (
-  <i className={allegiance === "WHITE" ? "white" : "black"}>B</i>
-);
+const Bishop = ({ allegiance }) =>
+  allegiance === "WHITE" ? (
+    <FontAwesomeIcon icon={faChessBishop} inverse size="3x" />
+  ) : (
+    <FontAwesomeIcon icon={faChessBishop} size="3x" />
+  );
 
-const King = ({ allegiance }) => (
-  <i className={allegiance === "WHITE" ? "white" : "black"}>K</i>
-);
+const King = ({ allegiance }) =>
+  allegiance === "WHITE" ? (
+    <FontAwesomeIcon icon={faChessKing} inverse size="3x" />
+  ) : (
+    <FontAwesomeIcon icon={faChessKing} size="3x" />
+  );
 
-const Queen = ({ allegiance }) => (
-  <i className={allegiance === "WHITE" ? "white" : "black"}>Q</i>
-);
+const Queen = ({ allegiance }) =>
+  allegiance === "WHITE" ? (
+    <FontAwesomeIcon icon={faChessQueen} inverse size="3x" />
+  ) : (
+    <FontAwesomeIcon icon={faChessQueen} size="3x" />
+  );
 
 const renderTileContents = (tile) => {
   switch (tile.contents?.type) {
@@ -48,14 +71,22 @@ const renderTileContents = (tile) => {
 };
 
 const Tile = ({ tile, dropHandler }) => {
-  const [, drag] = useDrag(() => ({
+  const [{ isDragging }, drag] = useDrag(() => ({
     type: "PIECE",
+    canDrag: () => true,
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging()
+    }),
     item: tile
   }));
 
-  const [, drop] = useDrop(() => ({
+  const [{ canDrop }, drop] = useDrop(() => ({
     accept: "PIECE",
-    drop: (item) => dropHandler(item, tile)
+    canDrop: () => true,
+    drop: (item) => dropHandler(item, tile),
+    collect: (monitor) => ({
+      canDrop: !!monitor.canDrop()
+    })
   }));
 
   return (
