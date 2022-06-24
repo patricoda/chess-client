@@ -1,12 +1,13 @@
-import { type} from '../enums/enums';
+import { type } from "../enums/enums";
 
-export const getMoves(boardState, tile) {
-    const validMoves = [];
+export const getMoves = (boardState, tile) => {
+  const validMoves = [];
 
-    if(tile.piece.type === type.PAWN) {
-        //find piece's location in the boardState
-        //push cells / tiles that are valid to move to
-    }
-    
-    return validMoves;
-}
+  if (tile.piece.type === type.PAWN) {
+    validMoves.push(boardState[tile.row - 1][tile.col]);
+    //find piece's location in the boardState
+    //push cells / tiles that are valid to move to
+  }
+
+  return validMoves;
+};

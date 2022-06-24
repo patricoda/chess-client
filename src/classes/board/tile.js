@@ -1,17 +1,20 @@
 import { immerable } from "immer";
+import { boardDimensions } from "../../utils/values";
+
+const COLUMN_VALUES = "abcdefgh";
 
 export default class Tile {
   [immerable] = true;
-  column;
   row;
+  col;
   piece = null;
 
-  constructor(column, row) {
-    this.column = column;
+  constructor(row, col) {
     this.row = row;
+    this.col = col;
   }
 
-  get coords() {
-    return `${this.column + this.row}`;
+  get chessCoords() {
+    return `${COLUMN_VALUES[this.col] + (boardDimensions.rows - this.row)}`;
   }
 }

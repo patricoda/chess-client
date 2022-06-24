@@ -52,12 +52,12 @@ const boardReducer = produce((state, action) => {
       return state;
     case "MOVE_PIECE":
       const sourceTile = state.findTileByCoords(
-        action.sourceTile.column,
-        action.sourceTile.row
+        action.sourceTile.row,
+        action.sourceTile.col
       );
       const destinationTile = state.findTileByCoords(
-        action.destinationTile.column,
-        action.destinationTile.row
+        action.destinationTile.row,
+        action.destinationTile.col
       );
 
       destinationTile.piece = sourceTile.piece;

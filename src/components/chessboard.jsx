@@ -60,15 +60,35 @@ const renderTileContents = (tile) => {
         </Piece>
       );
     case "ROOK":
-      return <Rook allegiance={tile.piece.allegiance} />;
+      return (
+        <Piece tile={tile}>
+          <Rook allegiance={tile.piece.allegiance} />
+        </Piece>
+      );
     case "KNIGHT":
-      return <Knight allegiance={tile.piece.allegiance} />;
+      return (
+        <Piece tile={tile}>
+          <Knight allegiance={tile.piece.allegiance} />
+        </Piece>
+      );
     case "BISHOP":
-      return <Bishop allegiance={tile.piece.allegiance} />;
+      return (
+        <Piece tile={tile}>
+          <Bishop allegiance={tile.piece.allegiance} />
+        </Piece>
+      );
     case "KING":
-      return <King allegiance={tile.piece.allegiance} />;
+      return (
+        <Piece tile={tile}>
+          <King allegiance={tile.piece.allegiance} />
+        </Piece>
+      );
     case "QUEEN":
-      return <Queen allegiance={tile.piece.allegiance} />;
+      return (
+        <Piece tile={tile}>
+          <Queen allegiance={tile.piece.allegiance} />
+        </Piece>
+      );
     default:
       return <></>;
   }
@@ -90,7 +110,7 @@ const Tile = ({ tile, dropHandler }) => {
   }));
 
   return (
-    <td ref={(node) => drop(node)} id={`${tile.coords}`}>
+    <td ref={(node) => drop(node)} id={`${tile.chessCoords}`}>
       {renderTileContents(tile)}
     </td>
   );
@@ -100,7 +120,7 @@ const Row = ({ tiles, ...props }) => {
   return (
     <tr>
       {tiles.map((tile) => (
-        <Tile key={tile.coords} tile={tile} {...props} />
+        <Tile key={tile.chessCoords} tile={tile} {...props} />
       ))}
     </tr>
   );

@@ -1,12 +1,9 @@
 import { immerable } from "immer";
 import Tile from "./tile";
-
-const COLUMN_VALUES = "abcdefgh";
+import { boardDimensions } from "../../utils/values";
 
 export default class BoardState {
   [immerable] = true;
-  columnsLength = 8;
-  rowsLength = 8;
   tiles = [];
 
   constructor() {
@@ -14,17 +11,15 @@ export default class BoardState {
   }
 
   generateTiles() {
-    for (let c = 0; c < this.columnsLength; c++) {
+    for (let r = 0; r < boardDimensions.rows; r++) {
       this.tiles.push([]);
-      for (let r = 0; r < this.rowsLength; r++) {
-        this.tiles[c].push(new Tile(COLUMN_VALUES[r], this.columnsLength - c));
+      for (let c = 0; c < boardDimensions.columns; c++) {
+        this.tiles[r].push(new Tile(r, c));
       }
     }
   }
 
-  findTileByCoords(column, row) {
-    return this.tiles[this.tiles.length - row].find(
-      (tile) => tile.column === column
-    );
+  findTileByCoords(row, col) {
+    return this.tiles[row][col];
   }
 }
