@@ -21,4 +21,10 @@ export default class BoardState {
       }
     }
   }
+
+  findTileByCoords(column, row) {
+    return this.tiles[this.tiles.length - row].find(
+      (tile) => tile.column === column
+    );
+  }
 }

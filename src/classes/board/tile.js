@@ -4,7 +4,7 @@ export default class Tile {
   [immerable] = true;
   column;
   row;
-  contents;
+  piece = null;
 
   constructor(column, row) {
     this.column = column;

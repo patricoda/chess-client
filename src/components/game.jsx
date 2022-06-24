@@ -3,59 +3,46 @@ import produce from "immer";
 import BoardState from "../classes/board/boardState";
 import Chessboard from "./chessboard";
 import Piece from "../classes/piece";
-
-const allegiance = Object.freeze({
-  BLACK: "BLACK",
-  WHITE: "WHITE"
-});
-
-const type = Object.freeze({
-  PAWN: "PAWN",
-  KING: "KING",
-  QUEEN: "QUEEN",
-  ROOK: "ROOK",
-  BISHOP: "BISHOP",
-  KNIGHT: "KNIGHT"
-});
+import { allegiance, type } from "../enums/enums";
 
 const defaultGameState = new BoardState();
 
 const setPieces = (boardState) => {
-  boardState.tiles[0][0].contents = new Piece(allegiance.BLACK, type.ROOK);
-  boardState.tiles[0][1].contents = new Piece(allegiance.BLACK, type.KNIGHT);
-  boardState.tiles[0][2].contents = new Piece(allegiance.BLACK, type.BISHOP);
-  boardState.tiles[0][3].contents = new Piece(allegiance.BLACK, type.QUEEN);
-  boardState.tiles[0][4].contents = new Piece(allegiance.BLACK, type.KING);
-  boardState.tiles[0][5].contents = new Piece(allegiance.BLACK, type.BISHOP);
-  boardState.tiles[0][6].contents = new Piece(allegiance.BLACK, type.KNIGHT);
-  boardState.tiles[0][7].contents = new Piece(allegiance.BLACK, type.ROOK);
+  boardState.tiles[0][0].piece = new Piece(allegiance.BLACK, type.ROOK);
+  boardState.tiles[0][1].piece = new Piece(allegiance.BLACK, type.KNIGHT);
+  boardState.tiles[0][2].piece = new Piece(allegiance.BLACK, type.BISHOP);
+  boardState.tiles[0][3].piece = new Piece(allegiance.BLACK, type.QUEEN);
+  boardState.tiles[0][4].piece = new Piece(allegiance.BLACK, type.KING);
+  boardState.tiles[0][5].piece = new Piece(allegiance.BLACK, type.BISHOP);
+  boardState.tiles[0][6].piece = new Piece(allegiance.BLACK, type.KNIGHT);
+  boardState.tiles[0][7].piece = new Piece(allegiance.BLACK, type.ROOK);
 
-  boardState.tiles[1][0].contents = new Piece(allegiance.BLACK, type.PAWN);
-  boardState.tiles[1][1].contents = new Piece(allegiance.BLACK, type.PAWN);
-  boardState.tiles[1][2].contents = new Piece(allegiance.BLACK, type.PAWN);
-  boardState.tiles[1][3].contents = new Piece(allegiance.BLACK, type.PAWN);
-  boardState.tiles[1][4].contents = new Piece(allegiance.BLACK, type.PAWN);
-  boardState.tiles[1][5].contents = new Piece(allegiance.BLACK, type.PAWN);
-  boardState.tiles[1][6].contents = new Piece(allegiance.BLACK, type.PAWN);
-  boardState.tiles[1][7].contents = new Piece(allegiance.BLACK, type.PAWN);
+  boardState.tiles[1][0].piece = new Piece(allegiance.BLACK, type.PAWN);
+  boardState.tiles[1][1].piece = new Piece(allegiance.BLACK, type.PAWN);
+  boardState.tiles[1][2].piece = new Piece(allegiance.BLACK, type.PAWN);
+  boardState.tiles[1][3].piece = new Piece(allegiance.BLACK, type.PAWN);
+  boardState.tiles[1][4].piece = new Piece(allegiance.BLACK, type.PAWN);
+  boardState.tiles[1][5].piece = new Piece(allegiance.BLACK, type.PAWN);
+  boardState.tiles[1][6].piece = new Piece(allegiance.BLACK, type.PAWN);
+  boardState.tiles[1][7].piece = new Piece(allegiance.BLACK, type.PAWN);
 
-  boardState.tiles[6][0].contents = new Piece(allegiance.WHITE, type.PAWN);
-  boardState.tiles[6][1].contents = new Piece(allegiance.WHITE, type.PAWN);
-  boardState.tiles[6][2].contents = new Piece(allegiance.WHITE, type.PAWN);
-  boardState.tiles[6][3].contents = new Piece(allegiance.WHITE, type.PAWN);
-  boardState.tiles[6][4].contents = new Piece(allegiance.WHITE, type.PAWN);
-  boardState.tiles[6][5].contents = new Piece(allegiance.WHITE, type.PAWN);
-  boardState.tiles[6][6].contents = new Piece(allegiance.WHITE, type.PAWN);
-  boardState.tiles[6][7].contents = new Piece(allegiance.WHITE, type.PAWN);
+  boardState.tiles[6][0].piece = new Piece(allegiance.WHITE, type.PAWN);
+  boardState.tiles[6][1].piece = new Piece(allegiance.WHITE, type.PAWN);
+  boardState.tiles[6][2].piece = new Piece(allegiance.WHITE, type.PAWN);
+  boardState.tiles[6][3].piece = new Piece(allegiance.WHITE, type.PAWN);
+  boardState.tiles[6][4].piece = new Piece(allegiance.WHITE, type.PAWN);
+  boardState.tiles[6][5].piece = new Piece(allegiance.WHITE, type.PAWN);
+  boardState.tiles[6][6].piece = new Piece(allegiance.WHITE, type.PAWN);
+  boardState.tiles[6][7].piece = new Piece(allegiance.WHITE, type.PAWN);
 
-  boardState.tiles[7][0].contents = new Piece(allegiance.WHITE, type.ROOK);
-  boardState.tiles[7][1].contents = new Piece(allegiance.WHITE, type.KNIGHT);
-  boardState.tiles[7][2].contents = new Piece(allegiance.WHITE, type.BISHOP);
-  boardState.tiles[7][3].contents = new Piece(allegiance.WHITE, type.QUEEN);
-  boardState.tiles[7][4].contents = new Piece(allegiance.WHITE, type.KING);
-  boardState.tiles[7][5].contents = new Piece(allegiance.WHITE, type.BISHOP);
-  boardState.tiles[7][6].contents = new Piece(allegiance.WHITE, type.KNIGHT);
-  boardState.tiles[7][7].contents = new Piece(allegiance.WHITE, type.ROOK);
+  boardState.tiles[7][0].piece = new Piece(allegiance.WHITE, type.ROOK);
+  boardState.tiles[7][1].piece = new Piece(allegiance.WHITE, type.KNIGHT);
+  boardState.tiles[7][2].piece = new Piece(allegiance.WHITE, type.BISHOP);
+  boardState.tiles[7][3].piece = new Piece(allegiance.WHITE, type.QUEEN);
+  boardState.tiles[7][4].piece = new Piece(allegiance.WHITE, type.KING);
+  boardState.tiles[7][5].piece = new Piece(allegiance.WHITE, type.BISHOP);
+  boardState.tiles[7][6].piece = new Piece(allegiance.WHITE, type.KNIGHT);
+  boardState.tiles[7][7].piece = new Piece(allegiance.WHITE, type.ROOK);
 };
 
 const boardReducer = produce((state, action) => {
@@ -64,16 +51,17 @@ const boardReducer = produce((state, action) => {
       setPieces(state);
       return state;
     case "MOVE_PIECE":
-      const tiles = state.tiles;
-      const sourceTile = tiles[tiles.length - action.sourceTile.row].find(
-        (tile) => tile.column === action.sourceTile.column
+      const sourceTile = state.findTileByCoords(
+        action.sourceTile.column,
+        action.sourceTile.row
       );
-      const destinationTile = tiles[
-        tiles.length - action.destinationTile.row
-      ].find((tile) => tile.column === action.destinationTile.column);
+      const destinationTile = state.findTileByCoords(
+        action.destinationTile.column,
+        action.destinationTile.row
+      );
 
-      destinationTile.contents = sourceTile.contents;
-      sourceTile.contents = null;
+      destinationTile.piece = sourceTile.piece;
+      sourceTile.piece = null;
 
       return state;
     default:

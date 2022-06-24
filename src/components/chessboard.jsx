@@ -52,45 +52,45 @@ const Queen = ({ allegiance }) =>
   );
 
 const renderTileContents = (tile) => {
-  switch (tile.contents?.type) {
+  switch (tile.piece?.type) {
     case "PAWN":
-      return <Pawn allegiance={tile.contents.allegiance} />;
+      return (
+        <Piece tile={tile}>
+          <Pawn allegiance={tile.piece.allegiance} />
+        </Piece>
+      );
     case "ROOK":
-      return <Rook allegiance={tile.contents.allegiance} />;
+      return <Rook allegiance={tile.piece.allegiance} />;
     case "KNIGHT":
-      return <Knight allegiance={tile.contents.allegiance} />;
+      return <Knight allegiance={tile.piece.allegiance} />;
     case "BISHOP":
-      return <Bishop allegiance={tile.contents.allegiance} />;
+      return <Bishop allegiance={tile.piece.allegiance} />;
     case "KING":
-      return <King allegiance={tile.contents.allegiance} />;
+      return <King allegiance={tile.piece.allegiance} />;
     case "QUEEN":
-      return <Queen allegiance={tile.contents.allegiance} />;
+      return <Queen allegiance={tile.piece.allegiance} />;
     default:
       return <></>;
   }
 };
 
-const Tile = ({ tile, dropHandler }) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
+const Piece = ({ tile, children }) => {
+  const [, drag] = useDrag(() => ({
     type: "PIECE",
-    canDrag: () => true,
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging()
-    }),
     item: tile
   }));
 
-  const [{ canDrop }, drop] = useDrop(() => ({
+  return <div ref={(node) => drag(node)}>{children}</div>;
+};
+
+const Tile = ({ tile, dropHandler }) => {
+  const [, drop] = useDrop(() => ({
     accept: "PIECE",
-    canDrop: () => true,
-    drop: (item) => dropHandler(item, tile),
-    collect: (monitor) => ({
-      canDrop: !!monitor.canDrop()
-    })
+    drop: (item) => dropHandler(item, tile)
   }));
 
   return (
-    <td ref={(node) => drag(drop(node))} id={`${tile.coords}`}>
+    <td ref={(node) => drop(node)} id={`${tile.coords}`}>
       {renderTileContents(tile)}
     </td>
   );
