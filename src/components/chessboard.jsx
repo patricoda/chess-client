@@ -51,11 +51,11 @@ const Queen = ({ allegiance }) =>
     <FontAwesomeIcon icon={faChessQueen} size="3x" />
   );
 
-const renderTileContents = (tile) => {
+const renderTileContents = (tile, dragHandler) => {
   switch (tile.piece?.type) {
     case "PAWN":
       return (
-        <Piece tile={tile}>
+        <Piece tile={tile} dragHandler={dragHandler}>
           <Pawn allegiance={tile.piece.allegiance} />
         </Piece>
       );
@@ -94,24 +94,34 @@ const renderTileContents = (tile) => {
   }
 };
 
-const Piece = ({ tile, children }) => {
-  const [, drag] = useDrag(() => ({
-    type: "PIECE",
-    item: tile
-  }));
+const Piece = ({ tile, dragHandler, children }) => {
+  const [, drag] = useDrag(
+    () => ({
+      type: "PIECE",
+      item: () => {
+        dragHandler(tile);
+        return tile;
+      }
+    }),
+    []
+  );
 
   return <div ref={(node) => drag(node)}>{children}</div>;
 };
 
-const Tile = ({ tile, dropHandler }) => {
-  const [, drop] = useDrop(() => ({
-    accept: "PIECE",
-    drop: (item) => dropHandler(item, tile)
-  }));
+const Tile = ({ tile, playerMoves, dropHandler, dragHandler }) => {
+  const [, drop] = useDrop(
+    () => ({
+      accept: "PIECE",
+      canDrop: () => playerMoves.includes(tile),
+      drop: (item) => dropHandler(item, tile)
+    }),
+    [playerMoves]
+  );
 
   return (
     <td ref={(node) => drop(node)} id={`${tile.chessCoords}`}>
-      {renderTileContents(tile)}
+      {renderTileContents(tile, dragHandler)}
     </td>
   );
 };

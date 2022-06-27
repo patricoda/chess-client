@@ -1,9 +1,10 @@
-import { memo, useCallback, useEffect, useReducer } from "react";
+import { memo, useCallback, useEffect, useReducer, useState } from "react";
 import produce from "immer";
 import BoardState from "../classes/board/boardState";
 import Chessboard from "./chessboard";
 import Piece from "../classes/piece";
 import { allegiance, type } from "../enums/enums";
+import { getMoves } from "../utils/moveEngine";
 
 const defaultGameState = new BoardState();
 
@@ -70,7 +71,15 @@ const boardReducer = produce((state, action) => {
 });
 
 const Game = () => {
+  const [playerMoves, setPlayerMoves] = useState([]);
   const [boardState, dispatch] = useReducer(boardReducer, defaultGameState);
+
+  const onDragHandler = useCallback(
+    (tile) => {
+      setPlayerMoves(getMoves(boardState, tile));
+    },
+    [boardState]
+  );
 
   const onDropHandler = useCallback((sourceTile, dropTile) => {
     dispatch({ type: "MOVE_PIECE", sourceTile, destinationTile: dropTile });
@@ -80,7 +89,14 @@ const Game = () => {
     dispatch({ type: "SET_BOARD" });
   }, []);
 
-  return <Chessboard boardState={boardState} dropHandler={onDropHandler} />;
+  return (
+    <Chessboard
+      playerMoves={playerMoves}
+      boardState={boardState}
+      dragHandler={onDragHandler}
+      dropHandler={onDropHandler}
+    />
+  );
 };
 
 export default memo(Game);
