@@ -1,13 +1,36 @@
-import { type } from "../enums/enums";
+import { PieceType } from "../enums/enums";
 
-export const getMoves = (boardState, tile) => {
+export const generateAllMoves = (boardState) => {
+  const populatedTiles = boardState.tiles.flat().filter((tile) => tile.piece);
+  for (const tile of populatedTiles) {
+    generateMoves(tile);
+  }
+};
+
+export const generateMoves = ({ piece, row, col }) => {
   const validMoves = [];
-
-  if (tile.piece.type === type.PAWN) {
-    validMoves.push(boardState.tiles[tile.row - 1][tile.col]);
-    //find piece's location in the boardState
-    //push cells / tiles that are valid to move to
+  switch (piece.type) {
+    case PieceType.PAWN:
+      validMoves.push({ row: row - 1, col });
+      break;
+    case PieceType.ROOK:
+      validMoves.push({ row: row - 1, col });
+      break;
+    case PieceType.KNIGHT:
+      validMoves.push({ row: row - 1, col });
+      break;
+    case PieceType.BISHOP:
+      validMoves.push({ row: row - 1, col });
+      break;
+    case PieceType.KING:
+      validMoves.push({ row: row - 1, col });
+      break;
+    case PieceType.QUEEN:
+      validMoves.push({ row: row - 1, col });
+      break;
+    default:
+      break;
   }
 
-  return validMoves;
+  piece.validMoves = validMoves;
 };

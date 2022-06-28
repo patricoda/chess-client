@@ -1,9 +1,9 @@
-export const allegiance = Object.freeze({
+export const Allegiance = Object.freeze({
   BLACK: "BLACK",
   WHITE: "WHITE"
 });
 
-export const type = Object.freeze({
+export const PieceType = Object.freeze({
   PAWN: "PAWN",
   KING: "KING",
   QUEEN: "QUEEN",

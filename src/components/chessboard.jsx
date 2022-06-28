@@ -7,6 +7,7 @@ import {
   faChessKnight,
   faChessPawn
 } from "@fortawesome/free-solid-svg-icons";
+import { PieceType } from "../enums/enums";
 import { useDrag, useDrop } from "react-dnd";
 
 const Pawn = ({ allegiance }) =>
@@ -53,39 +54,39 @@ const Queen = ({ allegiance }) =>
 
 const renderTileContents = (tile, dragHandler) => {
   switch (tile.piece?.type) {
-    case "PAWN":
+    case PieceType.PAWN:
       return (
         <Piece tile={tile} dragHandler={dragHandler}>
           <Pawn allegiance={tile.piece.allegiance} />
         </Piece>
       );
-    case "ROOK":
+    case PieceType.ROOK:
       return (
-        <Piece tile={tile}>
+        <Piece tile={tile} dragHandler={dragHandler}>
           <Rook allegiance={tile.piece.allegiance} />
         </Piece>
       );
-    case "KNIGHT":
+    case PieceType.KNIGHT:
       return (
-        <Piece tile={tile}>
+        <Piece tile={tile} dragHandler={dragHandler}>
           <Knight allegiance={tile.piece.allegiance} />
         </Piece>
       );
-    case "BISHOP":
+    case PieceType.BISHOP:
       return (
-        <Piece tile={tile}>
+        <Piece tile={tile} dragHandler={dragHandler}>
           <Bishop allegiance={tile.piece.allegiance} />
         </Piece>
       );
-    case "KING":
+    case PieceType.KING:
       return (
-        <Piece tile={tile}>
+        <Piece tile={tile} dragHandler={dragHandler}>
           <King allegiance={tile.piece.allegiance} />
         </Piece>
       );
-    case "QUEEN":
+    case PieceType.QUEEN:
       return (
-        <Piece tile={tile}>
+        <Piece tile={tile} dragHandler={dragHandler}>
           <Queen allegiance={tile.piece.allegiance} />
         </Piece>
       );
@@ -109,14 +110,14 @@ const Piece = ({ tile, dragHandler, children }) => {
   return <div ref={(node) => drag(node)}>{children}</div>;
 };
 
-const Tile = ({ tile, playerMoves, dropHandler, dragHandler }) => {
+const Tile = ({ tile, heldPiece, dropHandler, dragHandler }) => {
   const [, drop] = useDrop(
     () => ({
       accept: "PIECE",
-      canDrop: () => playerMoves.includes(tile),
+      canDrop: () => heldPiece.isValidMove(tile.row, tile.col),
       drop: (item) => dropHandler(item, tile)
     }),
-    [playerMoves]
+    [heldPiece]
   );
 
   return (
