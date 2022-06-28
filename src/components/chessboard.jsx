@@ -52,47 +52,33 @@ const Queen = ({ allegiance }) =>
     <FontAwesomeIcon icon={faChessQueen} size="3x" />
   );
 
-const renderTileContents = (tile, dragHandler) => {
-  switch (tile.piece?.type) {
+const renderPiece = ({ type, allegiance }) => {
+  switch (type) {
     case PieceType.PAWN:
-      return (
-        <Piece tile={tile} dragHandler={dragHandler}>
-          <Pawn allegiance={tile.piece.allegiance} />
-        </Piece>
-      );
+      return <Pawn allegiance={allegiance} />;
     case PieceType.ROOK:
-      return (
-        <Piece tile={tile} dragHandler={dragHandler}>
-          <Rook allegiance={tile.piece.allegiance} />
-        </Piece>
-      );
+      return <Rook allegiance={allegiance} />;
     case PieceType.KNIGHT:
-      return (
-        <Piece tile={tile} dragHandler={dragHandler}>
-          <Knight allegiance={tile.piece.allegiance} />
-        </Piece>
-      );
+      return <Knight allegiance={allegiance} />;
     case PieceType.BISHOP:
-      return (
-        <Piece tile={tile} dragHandler={dragHandler}>
-          <Bishop allegiance={tile.piece.allegiance} />
-        </Piece>
-      );
+      return <Bishop allegiance={allegiance} />;
     case PieceType.KING:
-      return (
-        <Piece tile={tile} dragHandler={dragHandler}>
-          <King allegiance={tile.piece.allegiance} />
-        </Piece>
-      );
+      return <King allegiance={allegiance} />;
     case PieceType.QUEEN:
-      return (
-        <Piece tile={tile} dragHandler={dragHandler}>
-          <Queen allegiance={tile.piece.allegiance} />
-        </Piece>
-      );
+      return <Queen allegiance={allegiance} />;
     default:
       return <></>;
   }
+};
+
+const renderTileContents = (tile, dragHandler) => {
+  return (
+    tile.piece && (
+      <Piece tile={tile} dragHandler={dragHandler}>
+        {renderPiece(tile.piece)}
+      </Piece>
+    )
+  );
 };
 
 const Piece = ({ tile, dragHandler, children }) => {
