@@ -4,7 +4,7 @@ import BoardState from "../classes/board/boardState";
 import Chessboard from "./chessboard";
 import Piece from "../classes/piece";
 import { Allegiance, PieceType } from "../enums/enums";
-import { generateAllMoves, generateMoves } from "../utils/moveEngine";
+import { generateAllMoves } from "../utils/moveEngine";
 
 const defaultGameState = new BoardState();
 
@@ -66,7 +66,7 @@ const boardReducer = produce((state, action) => {
       destinationTile.piece = sourceTile.piece;
       sourceTile.piece = null;
 
-      generateMoves(destinationTile);
+      generateAllMoves(state);
 
       return state;
     default:
@@ -82,6 +82,10 @@ const Game = () => {
     setHeldPiece(piece);
   }, []);
 
+  const onDragEndHandler = useCallback(() => {
+    setHeldPiece(null);
+  }, []);
+
   const onDropHandler = useCallback((sourceTile, dropTile) => {
     dispatch({ type: "MOVE_PIECE", sourceTile, destinationTile: dropTile });
   }, []);
@@ -95,6 +99,7 @@ const Game = () => {
       heldPiece={heldPiece}
       boardState={boardState}
       dragHandler={onDragHandler}
+      dragEndHandler={onDragEndHandler}
       dropHandler={onDropHandler}
     />
   );

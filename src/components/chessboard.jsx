@@ -71,44 +71,61 @@ const renderPiece = ({ type, allegiance }) => {
   }
 };
 
-const renderTileContents = (tile, dragHandler) => {
+const renderTileContents = (tile, dragHandler, dragEndHandler) => {
   return (
     tile.piece && (
-      <Piece tile={tile} dragHandler={dragHandler}>
+      <Piece
+        tile={tile}
+        dragHandler={dragHandler}
+        dragEndHandler={dragEndHandler}
+      >
         {renderPiece(tile.piece)}
       </Piece>
     )
   );
 };
 
-const Piece = ({ tile, dragHandler, children }) => {
+const Piece = ({ tile, dragHandler, dragEndHandler, children }) => {
   const [, drag] = useDrag(
     () => ({
       type: "PIECE",
       item: () => {
         dragHandler(tile);
         return tile;
-      }
+      },
+      end: dragEndHandler
     }),
-    []
+    [tile]
   );
 
   return <div ref={(node) => drag(node)}>{children}</div>;
 };
 
-const Tile = ({ tile, heldPiece, dropHandler, dragHandler }) => {
+const Tile = ({
+  tile,
+  heldPiece,
+  dropHandler,
+  dragHandler,
+  dragEndHandler
+}) => {
+  const isValidDropTile = heldPiece?.isValidMove(tile.row, tile.col);
+
   const [, drop] = useDrop(
     () => ({
       accept: "PIECE",
-      canDrop: () => heldPiece.isValidMove(tile.row, tile.col),
+      canDrop: () => isValidDropTile,
       drop: (item) => dropHandler(item, tile)
     }),
     [heldPiece]
   );
 
   return (
-    <td ref={(node) => drop(node)} id={`${tile.chessCoords}`}>
-      {renderTileContents(tile, dragHandler)}
+    <td
+      className={isValidDropTile ? "validDropTile" : ""}
+      ref={(node) => drop(node)}
+      id={`${tile.chessCoords}`}
+    >
+      {renderTileContents(tile, dragHandler, dragEndHandler)}
     </td>
   );
 };
