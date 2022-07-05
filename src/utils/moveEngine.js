@@ -8,26 +8,73 @@ export const generateAllMoves = (boardState) => {
   }
 };
 
-const getLateralMoves = (tiles, pieceRow, pieceCol) => {
+const getOmnidirectionalMoves = (tiles, pieceRow, pieceCol, distanceLimit) => [
+  ...getLateralMoves(tiles, pieceRow, pieceCol, distanceLimit),
+  ...getDiagonalMoves(tiles, pieceRow, pieceCol, distanceLimit)
+];
+
+const getLateralMoves = (
+  tiles,
+  pieceRow,
+  pieceCol,
+  distanceLimit = boardDimensions.rows
+) => {
   const moves = [];
-  tiles.forEach((tileRow, i) => {
-    if (i === pieceRow) {
-      for (let { row, col } of tileRow) {
-        moves.push({ row, col });
-      }
+
+  for (let i = 1; i < distanceLimit; i++) {
+    if (tiles[pieceRow - i]?.[pieceCol]) {
+      const { row: upwardRow, col: upwardCol } = tiles[pieceRow - i][pieceCol];
+
+      moves.push({ row: upwardRow, col: upwardCol });
     } else {
-      moves.push({ row: i, col: pieceCol });
+      break;
     }
-  });
+  }
+
+  for (let i = 1; i < distanceLimit; i++) {
+    if (tiles[pieceRow + i]?.[pieceCol]) {
+      const { row: downwardRow, col: downwardCol } =
+        tiles[pieceRow + i][pieceCol];
+
+      moves.push({ row: downwardRow, col: downwardCol });
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < distanceLimit; i++) {
+    if (tiles[pieceRow]?.[pieceCol - i]) {
+      const { row: leftRow, col: leftCol } = tiles[pieceRow][pieceCol - i];
+
+      moves.push({ row: leftRow, col: leftCol });
+    } else {
+      break;
+    }
+  }
+
+  for (let i = 1; i < distanceLimit; i++) {
+    if (tiles[pieceRow]?.[pieceCol + i]) {
+      const { row: leftRow, col: leftCol } = tiles[pieceRow][pieceCol + i];
+
+      moves.push({ row: leftRow, col: leftCol });
+    } else {
+      break;
+    }
+  }
 
   return moves;
 };
 
-const getDiagonalMovement = (tiles, pieceRow, pieceCol) => {
+const getDiagonalMoves = (
+  tiles,
+  pieceRow,
+  pieceCol,
+  distanceLimit = boardDimensions.rows
+) => {
   const moves = [];
 
-  for (let i = 0; i < boardDimensions.rows; i++) {
-    if (tiles[pieceRow - i] && tiles[pieceRow - i][pieceCol - i]) {
+  for (let i = 1; i < distanceLimit; i++) {
+    if (tiles[pieceRow - i]?.[pieceCol - i]) {
       const { row: leftDiagRow, col: leftDiagCol } =
         tiles[pieceRow - i][pieceCol - i];
 
@@ -37,8 +84,8 @@ const getDiagonalMovement = (tiles, pieceRow, pieceCol) => {
     }
   }
 
-  for (let i = 0; i < boardDimensions.rows; i++) {
-    if (tiles[pieceRow - i] && tiles[pieceRow - i][pieceCol + i]) {
+  for (let i = 1; i < distanceLimit; i++) {
+    if (tiles[pieceRow - i]?.[pieceCol + i]) {
       const { row: rightDiagRow, col: rightDiagCol } =
         tiles[pieceRow - i][pieceCol + i];
 
@@ -48,8 +95,8 @@ const getDiagonalMovement = (tiles, pieceRow, pieceCol) => {
     }
   }
 
-  for (let i = 0; i < boardDimensions.rows; i++) {
-    if (tiles[pieceRow + i] && tiles[pieceRow + i][pieceCol - i]) {
+  for (let i = 1; i < distanceLimit; i++) {
+    if (tiles[pieceRow + i]?.[pieceCol - i]) {
       const { row: leftDiagRow, col: leftDiagCol } =
         tiles[pieceRow + i][pieceCol - i];
 
@@ -59,8 +106,8 @@ const getDiagonalMovement = (tiles, pieceRow, pieceCol) => {
     }
   }
 
-  for (let i = 0; i < boardDimensions.rows; i++) {
-    if (tiles[pieceRow + i] && tiles[pieceRow + i][pieceCol + i]) {
+  for (let i = 1; i < distanceLimit; i++) {
+    if (tiles[pieceRow + i]?.[pieceCol + i]) {
       const { row: rightDiagRow, col: rightDiagCol } =
         tiles[pieceRow + i][pieceCol + i];
 
@@ -71,6 +118,23 @@ const getDiagonalMovement = (tiles, pieceRow, pieceCol) => {
   }
 
   return moves;
+};
+
+const getKnightMoves = (tiles, pieceRow, pieceCol) => {
+  const possibleMoves = [
+    tiles[pieceRow - 2]?.[pieceCol - 1],
+    tiles[pieceRow - 2]?.[pieceCol + 1],
+    tiles[pieceRow + 2]?.[pieceCol - 1],
+    tiles[pieceRow + 2]?.[pieceCol + 1],
+    tiles[pieceRow - 1]?.[pieceCol - 2],
+    tiles[pieceRow - 1]?.[pieceCol + 2],
+    tiles[pieceRow + 1]?.[pieceCol - 2],
+    tiles[pieceRow + 1]?.[pieceCol + 2]
+  ];
+
+  return possibleMoves
+    .filter((move) => move)
+    .map(({ row, col }) => ({ row, col }));
 };
 
 export const generateMoves = (
@@ -86,16 +150,16 @@ export const generateMoves = (
       validMoves.push(...getLateralMoves(tiles, pieceRow, pieceCol));
       break;
     case PieceType.KNIGHT:
-      validMoves.push({ row: pieceRow - 1, col: pieceCol });
+      validMoves.push(...getKnightMoves(tiles, pieceRow, pieceCol));
       break;
     case PieceType.BISHOP:
-      validMoves.push(...getDiagonalMovement(tiles, pieceRow, pieceCol));
+      validMoves.push(...getDiagonalMoves(tiles, pieceRow, pieceCol));
       break;
     case PieceType.KING:
-      validMoves.push({ row: pieceRow - 1, col: pieceCol });
+      validMoves.push(...getOmnidirectionalMoves(tiles, pieceRow, pieceCol, 2));
       break;
     case PieceType.QUEEN:
-      validMoves.push(...getLateralMoves(tiles, pieceRow, pieceCol));
+      validMoves.push(...getOmnidirectionalMoves(tiles, pieceRow, pieceCol));
       break;
     default:
       break;
