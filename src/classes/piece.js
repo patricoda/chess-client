@@ -11,4 +11,8 @@ export default class Piece {
   isValidMove(row, col) {
     return this.validMoves.some((move) => move.row === row && move.col === col);
   }
+
+  isCapturable(capturingPiece) {
+    return this.allegiance !== capturingPiece.allegiance;
+  }
 }

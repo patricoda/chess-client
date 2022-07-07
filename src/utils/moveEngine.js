@@ -8,24 +8,30 @@ export const generateAllMoves = (boardState) => {
   }
 };
 
-const getOmnidirectionalMoves = (tiles, pieceRow, pieceCol, distanceLimit) => [
-  ...getLateralMoves(tiles, pieceRow, pieceCol, distanceLimit),
-  ...getDiagonalMoves(tiles, pieceRow, pieceCol, distanceLimit)
+const getOmnidirectionalMoves = (tiles, actionedTile, distanceLimit) => [
+  ...getLateralMoves(tiles, actionedTile, distanceLimit),
+  ...getDiagonalMoves(tiles, actionedTile, distanceLimit)
 ];
 
 const getLateralMoves = (
   tiles,
-  pieceRow,
-  pieceCol,
+  { row: pieceRow, col: pieceCol, piece: actionedPiece },
   distanceLimit = boardDimensions.rows
 ) => {
   const moves = [];
 
   for (let i = 1; i < distanceLimit; i++) {
     if (tiles[pieceRow - i]?.[pieceCol]) {
-      const { row: upwardRow, col: upwardCol } = tiles[pieceRow - i][pieceCol];
+      const { row, col, piece } = tiles[pieceRow - i][pieceCol];
 
-      moves.push({ row: upwardRow, col: upwardCol });
+      if (piece) {
+        if (piece.isCapturable(actionedPiece)) {
+          moves.push({ row, col });
+        }
+        break;
+      }
+
+      moves.push({ row, col });
     } else {
       break;
     }
@@ -33,10 +39,16 @@ const getLateralMoves = (
 
   for (let i = 1; i < distanceLimit; i++) {
     if (tiles[pieceRow + i]?.[pieceCol]) {
-      const { row: downwardRow, col: downwardCol } =
-        tiles[pieceRow + i][pieceCol];
+      const { row, col, piece } = tiles[pieceRow + i][pieceCol];
 
-      moves.push({ row: downwardRow, col: downwardCol });
+      if (piece) {
+        if (piece.isCapturable(actionedPiece)) {
+          moves.push({ row, col });
+        }
+        break;
+      }
+
+      moves.push({ row, col });
     } else {
       break;
     }
@@ -44,9 +56,16 @@ const getLateralMoves = (
 
   for (let i = 1; i < distanceLimit; i++) {
     if (tiles[pieceRow]?.[pieceCol - i]) {
-      const { row: leftRow, col: leftCol } = tiles[pieceRow][pieceCol - i];
+      const { row, col, piece } = tiles[pieceRow][pieceCol - i];
 
-      moves.push({ row: leftRow, col: leftCol });
+      if (piece) {
+        if (piece.isCapturable(actionedPiece)) {
+          moves.push({ row, col });
+        }
+        break;
+      }
+
+      moves.push({ row, col });
     } else {
       break;
     }
@@ -54,9 +73,16 @@ const getLateralMoves = (
 
   for (let i = 1; i < distanceLimit; i++) {
     if (tiles[pieceRow]?.[pieceCol + i]) {
-      const { row: leftRow, col: leftCol } = tiles[pieceRow][pieceCol + i];
+      const { row, col, piece } = tiles[pieceRow][pieceCol + i];
 
-      moves.push({ row: leftRow, col: leftCol });
+      if (piece) {
+        if (piece.isCapturable(actionedPiece)) {
+          moves.push({ row, col });
+        }
+        break;
+      }
+
+      moves.push({ row, col });
     } else {
       break;
     }
@@ -67,18 +93,23 @@ const getLateralMoves = (
 
 const getDiagonalMoves = (
   tiles,
-  pieceRow,
-  pieceCol,
+  { row: pieceRow, col: pieceCol, piece: actionedPiece },
   distanceLimit = boardDimensions.rows
 ) => {
   const moves = [];
 
   for (let i = 1; i < distanceLimit; i++) {
     if (tiles[pieceRow - i]?.[pieceCol - i]) {
-      const { row: leftDiagRow, col: leftDiagCol } =
-        tiles[pieceRow - i][pieceCol - i];
+      const { row, col, piece } = tiles[pieceRow - i][pieceCol - i];
 
-      moves.push({ row: leftDiagRow, col: leftDiagCol });
+      if (piece) {
+        if (piece.isCapturable(actionedPiece)) {
+          moves.push({ row, col });
+        }
+        break;
+      }
+
+      moves.push({ row, col });
     } else {
       break;
     }
@@ -86,10 +117,16 @@ const getDiagonalMoves = (
 
   for (let i = 1; i < distanceLimit; i++) {
     if (tiles[pieceRow - i]?.[pieceCol + i]) {
-      const { row: rightDiagRow, col: rightDiagCol } =
-        tiles[pieceRow - i][pieceCol + i];
+      const { row, col, piece } = tiles[pieceRow - i][pieceCol + i];
 
-      moves.push({ row: rightDiagRow, col: rightDiagCol });
+      if (piece) {
+        if (piece.isCapturable(actionedPiece)) {
+          moves.push({ row, col });
+        }
+        break;
+      }
+
+      moves.push({ row, col });
     } else {
       break;
     }
@@ -97,10 +134,16 @@ const getDiagonalMoves = (
 
   for (let i = 1; i < distanceLimit; i++) {
     if (tiles[pieceRow + i]?.[pieceCol - i]) {
-      const { row: leftDiagRow, col: leftDiagCol } =
-        tiles[pieceRow + i][pieceCol - i];
+      const { row, col, piece } = tiles[pieceRow + i][pieceCol - i];
 
-      moves.push({ row: leftDiagRow, col: leftDiagCol });
+      if (piece) {
+        if (piece.isCapturable(actionedPiece)) {
+          moves.push({ row, col });
+        }
+        break;
+      }
+
+      moves.push({ row, col });
     } else {
       break;
     }
@@ -108,10 +151,16 @@ const getDiagonalMoves = (
 
   for (let i = 1; i < distanceLimit; i++) {
     if (tiles[pieceRow + i]?.[pieceCol + i]) {
-      const { row: rightDiagRow, col: rightDiagCol } =
-        tiles[pieceRow + i][pieceCol + i];
+      const { row, col, piece } = tiles[pieceRow + i][pieceCol + i];
 
-      moves.push({ row: rightDiagRow, col: rightDiagCol });
+      if (piece) {
+        if (piece.isCapturable(actionedPiece)) {
+          moves.push({ row, col });
+        }
+        break;
+      }
+
+      moves.push({ row, col });
     } else {
       break;
     }
@@ -120,7 +169,10 @@ const getDiagonalMoves = (
   return moves;
 };
 
-const getKnightMoves = (tiles, pieceRow, pieceCol) => {
+const getKnightMoves = (
+  tiles,
+  { row: pieceRow, col: pieceCol, piece: actionedPiece }
+) => {
   const possibleMoves = [
     tiles[pieceRow - 2]?.[pieceCol - 1],
     tiles[pieceRow - 2]?.[pieceCol + 1],
@@ -133,37 +185,36 @@ const getKnightMoves = (tiles, pieceRow, pieceCol) => {
   ];
 
   return possibleMoves
-    .filter((move) => move)
+    .filter(
+      (move) => move && (!move.piece || move.piece.isCapturable(actionedPiece))
+    )
     .map(({ row, col }) => ({ row, col }));
 };
 
-export const generateMoves = (
-  { tiles },
-  { piece, row: pieceRow, col: pieceCol }
-) => {
+export const generateMoves = ({ tiles }, actionedTile) => {
   const validMoves = [];
-  switch (piece.type) {
+  switch (actionedTile.piece.type) {
     case PieceType.PAWN:
-      validMoves.push({ row: pieceRow - 1, col: pieceCol });
+      validMoves.push({ row: actionedTile.row - 1, col: actionedTile.col });
       break;
     case PieceType.ROOK:
-      validMoves.push(...getLateralMoves(tiles, pieceRow, pieceCol));
+      validMoves.push(...getLateralMoves(tiles, actionedTile));
       break;
     case PieceType.KNIGHT:
-      validMoves.push(...getKnightMoves(tiles, pieceRow, pieceCol));
+      validMoves.push(...getKnightMoves(tiles, actionedTile));
       break;
     case PieceType.BISHOP:
-      validMoves.push(...getDiagonalMoves(tiles, pieceRow, pieceCol));
+      validMoves.push(...getDiagonalMoves(tiles, actionedTile));
       break;
     case PieceType.KING:
-      validMoves.push(...getOmnidirectionalMoves(tiles, pieceRow, pieceCol, 2));
+      validMoves.push(...getOmnidirectionalMoves(tiles, actionedTile, 2));
       break;
     case PieceType.QUEEN:
-      validMoves.push(...getOmnidirectionalMoves(tiles, pieceRow, pieceCol));
+      validMoves.push(...getOmnidirectionalMoves(tiles, actionedTile));
       break;
     default:
       break;
   }
 
-  piece.validMoves = validMoves;
+  actionedTile.piece.validMoves = validMoves;
 };
