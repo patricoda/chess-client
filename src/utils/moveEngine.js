@@ -1,4 +1,4 @@
-import { PieceType } from "../enums/enums";
+import { Allegiance, DirectionOperator, PieceType } from "../enums/enums";
 import { boardDimensions } from "./values";
 
 export const generateAllMoves = (boardState) => {
@@ -8,194 +8,11 @@ export const generateAllMoves = (boardState) => {
   }
 };
 
-const getOmnidirectionalMoves = (tiles, actionedTile, distanceLimit) => [
-  ...getLateralMoves(tiles, actionedTile, distanceLimit),
-  ...getDiagonalMoves(tiles, actionedTile, distanceLimit)
-];
-
-const getLateralMoves = (
-  tiles,
-  { row: pieceRow, col: pieceCol, piece: actionedPiece },
-  distanceLimit = boardDimensions.rows
-) => {
-  const moves = [];
-
-  for (let i = 1; i < distanceLimit; i++) {
-    if (tiles[pieceRow - i]?.[pieceCol]) {
-      const { row, col, piece } = tiles[pieceRow - i][pieceCol];
-
-      if (piece) {
-        if (piece.isCapturable(actionedPiece)) {
-          moves.push({ row, col });
-        }
-        break;
-      }
-
-      moves.push({ row, col });
-    } else {
-      break;
-    }
-  }
-
-  for (let i = 1; i < distanceLimit; i++) {
-    if (tiles[pieceRow + i]?.[pieceCol]) {
-      const { row, col, piece } = tiles[pieceRow + i][pieceCol];
-
-      if (piece) {
-        if (piece.isCapturable(actionedPiece)) {
-          moves.push({ row, col });
-        }
-        break;
-      }
-
-      moves.push({ row, col });
-    } else {
-      break;
-    }
-  }
-
-  for (let i = 1; i < distanceLimit; i++) {
-    if (tiles[pieceRow]?.[pieceCol - i]) {
-      const { row, col, piece } = tiles[pieceRow][pieceCol - i];
-
-      if (piece) {
-        if (piece.isCapturable(actionedPiece)) {
-          moves.push({ row, col });
-        }
-        break;
-      }
-
-      moves.push({ row, col });
-    } else {
-      break;
-    }
-  }
-
-  for (let i = 1; i < distanceLimit; i++) {
-    if (tiles[pieceRow]?.[pieceCol + i]) {
-      const { row, col, piece } = tiles[pieceRow][pieceCol + i];
-
-      if (piece) {
-        if (piece.isCapturable(actionedPiece)) {
-          moves.push({ row, col });
-        }
-        break;
-      }
-
-      moves.push({ row, col });
-    } else {
-      break;
-    }
-  }
-
-  return moves;
-};
-
-const getDiagonalMoves = (
-  tiles,
-  { row: pieceRow, col: pieceCol, piece: actionedPiece },
-  distanceLimit = boardDimensions.rows
-) => {
-  const moves = [];
-
-  for (let i = 1; i < distanceLimit; i++) {
-    if (tiles[pieceRow - i]?.[pieceCol - i]) {
-      const { row, col, piece } = tiles[pieceRow - i][pieceCol - i];
-
-      if (piece) {
-        if (piece.isCapturable(actionedPiece)) {
-          moves.push({ row, col });
-        }
-        break;
-      }
-
-      moves.push({ row, col });
-    } else {
-      break;
-    }
-  }
-
-  for (let i = 1; i < distanceLimit; i++) {
-    if (tiles[pieceRow - i]?.[pieceCol + i]) {
-      const { row, col, piece } = tiles[pieceRow - i][pieceCol + i];
-
-      if (piece) {
-        if (piece.isCapturable(actionedPiece)) {
-          moves.push({ row, col });
-        }
-        break;
-      }
-
-      moves.push({ row, col });
-    } else {
-      break;
-    }
-  }
-
-  for (let i = 1; i < distanceLimit; i++) {
-    if (tiles[pieceRow + i]?.[pieceCol - i]) {
-      const { row, col, piece } = tiles[pieceRow + i][pieceCol - i];
-
-      if (piece) {
-        if (piece.isCapturable(actionedPiece)) {
-          moves.push({ row, col });
-        }
-        break;
-      }
-
-      moves.push({ row, col });
-    } else {
-      break;
-    }
-  }
-
-  for (let i = 1; i < distanceLimit; i++) {
-    if (tiles[pieceRow + i]?.[pieceCol + i]) {
-      const { row, col, piece } = tiles[pieceRow + i][pieceCol + i];
-
-      if (piece) {
-        if (piece.isCapturable(actionedPiece)) {
-          moves.push({ row, col });
-        }
-        break;
-      }
-
-      moves.push({ row, col });
-    } else {
-      break;
-    }
-  }
-
-  return moves;
-};
-
-const getKnightMoves = (
-  tiles,
-  { row: pieceRow, col: pieceCol, piece: actionedPiece }
-) => {
-  const possibleMoves = [
-    tiles[pieceRow - 2]?.[pieceCol - 1],
-    tiles[pieceRow - 2]?.[pieceCol + 1],
-    tiles[pieceRow + 2]?.[pieceCol - 1],
-    tiles[pieceRow + 2]?.[pieceCol + 1],
-    tiles[pieceRow - 1]?.[pieceCol - 2],
-    tiles[pieceRow - 1]?.[pieceCol + 2],
-    tiles[pieceRow + 1]?.[pieceCol - 2],
-    tiles[pieceRow + 1]?.[pieceCol + 2]
-  ];
-
-  return possibleMoves
-    .filter(
-      (move) => move && (!move.piece || move.piece.isCapturable(actionedPiece))
-    )
-    .map(({ row, col }) => ({ row, col }));
-};
-
 export const generateMoves = ({ tiles }, actionedTile) => {
   const validMoves = [];
   switch (actionedTile.piece.type) {
     case PieceType.PAWN:
-      validMoves.push({ row: actionedTile.row - 1, col: actionedTile.col });
+      validMoves.push(...getPawnMoves(tiles, actionedTile));
       break;
     case PieceType.ROOK:
       validMoves.push(...getLateralMoves(tiles, actionedTile));
@@ -217,4 +34,196 @@ export const generateMoves = ({ tiles }, actionedTile) => {
   }
 
   actionedTile.piece.validMoves = validMoves;
+};
+
+const getPawnMoves = (tiles, actionedTile) => {
+  const { piece: actionedPiece } = actionedTile;
+  const distanceLimit = actionedPiece.hasMoved ? 2 : 3;
+  const moves = [];
+
+  moves.push(
+    ...generateMovesInDirection(
+      tiles,
+      actionedPiece.allegiance === Allegiance.BLACK
+        ? DirectionOperator.PLUS
+        : DirectionOperator.MINUS,
+      null,
+      distanceLimit,
+      actionedTile
+    )
+  );
+
+  return moves;
+};
+
+const getKnightMoves = (
+  tiles,
+  { row: pieceRow, col: pieceCol, piece: actionedPiece }
+) => {
+  const possibleMoves = [
+    tiles[pieceRow - 2]?.[pieceCol - 1],
+    tiles[pieceRow - 2]?.[pieceCol + 1],
+    tiles[pieceRow + 2]?.[pieceCol - 1],
+    tiles[pieceRow + 2]?.[pieceCol + 1],
+    tiles[pieceRow - 1]?.[pieceCol - 2],
+    tiles[pieceRow - 1]?.[pieceCol + 2],
+    tiles[pieceRow + 1]?.[pieceCol - 2],
+    tiles[pieceRow + 1]?.[pieceCol + 2]
+  ];
+
+  return possibleMoves
+    .filter(
+      (tile) => tile && (!tile.piece || tile.piece.isCapturable(actionedPiece))
+    )
+    .map(({ row, col }) => ({ row, col }));
+};
+
+const getOmnidirectionalMoves = (tiles, actionedTile, distanceLimit) => [
+  ...getLateralMoves(tiles, actionedTile, distanceLimit),
+  ...getDiagonalMoves(tiles, actionedTile, distanceLimit)
+];
+
+const getLateralMoves = (
+  tiles,
+  actionedTile,
+  distanceLimit = boardDimensions.rows
+) => {
+  const moves = [];
+
+  moves.push(
+    ...generateMovesInDirection(
+      tiles,
+      DirectionOperator.MINUS,
+      null,
+      distanceLimit,
+      actionedTile
+    )
+  );
+
+  moves.push(
+    ...generateMovesInDirection(
+      tiles,
+      DirectionOperator.PLUS,
+      null,
+      distanceLimit,
+      actionedTile
+    )
+  );
+
+  moves.push(
+    ...generateMovesInDirection(
+      tiles,
+      null,
+      DirectionOperator.MINUS,
+      distanceLimit,
+      actionedTile
+    )
+  );
+
+  moves.push(
+    ...generateMovesInDirection(
+      tiles,
+      null,
+      DirectionOperator.PLUS,
+      distanceLimit,
+      actionedTile
+    )
+  );
+
+  return moves;
+};
+
+const getDiagonalMoves = (
+  tiles,
+  actionedTile,
+  distanceLimit = boardDimensions.rows
+) => {
+  const moves = [];
+
+  moves.push(
+    ...generateMovesInDirection(
+      tiles,
+      DirectionOperator.MINUS,
+      DirectionOperator.MINUS,
+      distanceLimit,
+      actionedTile
+    )
+  );
+
+  moves.push(
+    ...generateMovesInDirection(
+      tiles,
+      DirectionOperator.MINUS,
+      DirectionOperator.PLUS,
+      distanceLimit,
+      actionedTile
+    )
+  );
+
+  moves.push(
+    ...generateMovesInDirection(
+      tiles,
+      DirectionOperator.PLUS,
+      DirectionOperator.MINUS,
+      distanceLimit,
+      actionedTile
+    )
+  );
+
+  moves.push(
+    ...generateMovesInDirection(
+      tiles,
+      DirectionOperator.PLUS,
+      DirectionOperator.PLUS,
+      distanceLimit,
+      actionedTile
+    )
+  );
+
+  return moves;
+};
+
+const generateMovesInDirection = (
+  tiles,
+  rowDirection,
+  colDirection,
+  distanceLimit,
+  { row: pieceRow, col: pieceCol, piece: actionedPiece }
+) => {
+  const moves = [];
+
+  for (let i = 1; i < distanceLimit; i++) {
+    const tile =
+      tiles[nextTile(pieceRow, i, rowDirection)]?.[
+        nextTile(pieceCol, i, colDirection)
+      ];
+
+    if (tile) {
+      const { row, col, piece } = tile;
+
+      if (piece) {
+        if (piece.isCapturable(actionedPiece)) {
+          moves.push({ row, col });
+        }
+        return moves;
+      }
+
+      moves.push({ row, col });
+    } else {
+      return moves;
+    }
+  }
+
+  return moves;
+};
+
+const nextTile = (a, b, direction) => {
+  switch (direction) {
+    case DirectionOperator.PLUS:
+      return a + b;
+    case DirectionOperator.MINUS:
+      return a - b;
+    default:
+      return a;
+  }
 };

@@ -11,3 +11,8 @@ export const PieceType = Object.freeze({
   BISHOP: "BISHOP",
   KNIGHT: "KNIGHT"
 });
+
+export const DirectionOperator = Object.freeze({
+  PLUS: "PLUS",
+  MINUS: "MINUS"
+});

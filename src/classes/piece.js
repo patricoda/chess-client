@@ -2,6 +2,7 @@ export default class Piece {
   allegiance;
   type;
   validMoves = [];
+  hasMoved = false;
 
   constructor(allegiance, type) {
     this.allegiance = allegiance;
