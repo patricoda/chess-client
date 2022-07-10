@@ -36,24 +36,34 @@ export const generateMoves = ({ tiles }, actionedTile) => {
   actionedTile.piece.validMoves = validMoves;
 };
 
-const getPawnMoves = (tiles, actionedTile) => {
-  const { piece: actionedPiece } = actionedTile;
-  const distanceLimit = actionedPiece.hasMoved ? 2 : 3;
-  const moves = [];
+const getPawnMoves = (
+  tiles,
+  { row: pieceRow, col: pieceCol, piece: actionedPiece }
+) => {
+  const direction =
+    actionedPiece.allegiance === Allegiance.BLACK
+      ? DirectionOperator.PLUS
+      : DirectionOperator.MINUS;
 
-  moves.push(
-    ...generateMovesInDirection(
-      tiles,
-      actionedPiece.allegiance === Allegiance.BLACK
-        ? DirectionOperator.PLUS
-        : DirectionOperator.MINUS,
-      null,
-      distanceLimit,
-      actionedTile
-    )
-  );
+  const possibleMoves = [
+    tiles[nextTile(pieceRow, 1, direction)]?.[pieceCol],
+    !actionedPiece.hasMoved &&
+      tiles[nextTile(pieceRow, 2, direction)]?.[pieceCol]
+  ].filter((tile) => tile && !tile.piece);
 
-  return moves;
+  const possibleCapturingMoves = [
+    tiles[nextTile(pieceRow, 1, direction)]?.[
+      nextTile(pieceCol, 1, DirectionOperator.PLUS)
+    ],
+    tiles[nextTile(pieceRow, 1, direction)]?.[
+      nextTile(pieceCol, 1, DirectionOperator.MINUS)
+    ]
+  ].filter((tile) => tile && tile.piece?.isCapturable(actionedPiece));
+
+  return [...possibleMoves, ...possibleCapturingMoves].map(({ row, col }) => ({
+    row,
+    col
+  }));
 };
 
 const getKnightMoves = (

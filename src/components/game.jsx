@@ -64,6 +64,7 @@ const boardReducer = produce((state, action) => {
       );
 
       destinationTile.piece = sourceTile.piece;
+      destinationTile.piece.hasMoved = true;
       sourceTile.piece = null;
 
       generateAllMoves(state);
