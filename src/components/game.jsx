@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useReducer, useState } from "react";
+import { memo, useCallback, useEffect, useReducer } from "react";
 import produce from "immer";
 import BoardState from "../classes/board/boardState";
 import Chessboard from "./chessboard";
@@ -6,7 +6,15 @@ import Piece from "../classes/piece";
 import { Allegiance, PieceType } from "../enums/enums";
 import { generateAllMoves } from "../utils/moveEngine";
 
-const defaultGameState = new BoardState();
+const defaultBoardState = new BoardState();
+
+const defaultGameState = {
+  players: [
+    { allegiance: Allegiance.WHITE, isPlayerTurn: true },
+    { allegiance: Allegiance.BLACK, isPlayerTurn: false }
+  ],
+  moveHistory: []
+};
 
 const setPieces = (boardState) => {
   boardState.tiles[0][0].piece = new Piece(Allegiance.BLACK, PieceType.ROOK);
@@ -75,33 +83,48 @@ const boardReducer = produce((state, action) => {
   }
 });
 
+const gameReducer = produce((state, action) => {
+  switch (action.type) {
+    case "SWAP_PLAYER_TURN":
+      for (const player of state.players) {
+        player.isPlayerTurn = !player.isPlayerTurn;
+      }
+
+      return state;
+    default:
+      return state;
+  }
+});
+
 const Game = () => {
-  const [heldPiece, setHeldPiece] = useState(null);
-  const [boardState, dispatch] = useReducer(boardReducer, defaultGameState);
-
-  const onDragHandler = useCallback(({ piece }) => {
-    setHeldPiece(piece);
-  }, []);
-
-  const onDragEndHandler = useCallback(() => {
-    setHeldPiece(null);
-  }, []);
+  const [boardState, boardDispatch] = useReducer(
+    boardReducer,
+    defaultBoardState
+  );
+  const [gameState, gameDispatch] = useReducer(gameReducer, defaultGameState);
+  const activePlayer = gameState.players.find((player) => player.isPlayerTurn);
 
   const onDropHandler = useCallback((sourceTile, dropTile) => {
-    dispatch({ type: "MOVE_PIECE", sourceTile, destinationTile: dropTile });
+    boardDispatch({
+      type: "MOVE_PIECE",
+      sourceTile,
+      destinationTile: dropTile
+    });
+
+    gameDispatch({
+      type: "SWAP_PLAYER_TURN"
+    });
   }, []);
 
   useEffect(() => {
-    dispatch({ type: "SET_BOARD" });
+    boardDispatch({ type: "SET_BOARD" });
   }, []);
 
   return (
     <Chessboard
-      heldPiece={heldPiece}
       boardState={boardState}
-      dragHandler={onDragHandler}
-      dragEndHandler={onDragEndHandler}
       dropHandler={onDropHandler}
+      activePlayer={activePlayer}
     />
   );
 };

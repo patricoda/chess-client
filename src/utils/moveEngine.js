@@ -45,6 +45,7 @@ const getPawnMoves = (
       ? DirectionOperator.PLUS
       : DirectionOperator.MINUS;
 
+  //pawns follow different rules for movement / capturing pieces
   const possibleMoves = [
     tiles[nextTile(pieceRow, 1, direction)]?.[pieceCol],
     !actionedPiece.hasMoved &&

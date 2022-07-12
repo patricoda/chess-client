@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChessKing,
@@ -71,21 +72,14 @@ const renderPiece = ({ type, allegiance }) => {
   }
 };
 
-const renderTileContents = (tile, dragHandler, dragEndHandler) => {
-  return (
-    tile.piece && (
-      <Piece
-        tile={tile}
-        dragHandler={dragHandler}
-        dragEndHandler={dragEndHandler}
-      >
-        {renderPiece(tile.piece)}
-      </Piece>
-    )
-  );
-};
-
-const Piece = ({ tile, dragHandler, dragEndHandler, children }) => {
+const Piece = ({
+  tile,
+  allegiance,
+  activePlayer,
+  dragHandler,
+  dragEndHandler,
+  children
+}) => {
   const [, drag] = useDrag(
     () => ({
       type: "PIECE",
@@ -98,7 +92,15 @@ const Piece = ({ tile, dragHandler, dragEndHandler, children }) => {
     [tile]
   );
 
-  return <div ref={(node) => drag(node)}>{children}</div>;
+  return (
+    <div
+      ref={(node) =>
+        activePlayer.allegiance === allegiance ? drag(node) : node
+      }
+    >
+      {children}
+    </div>
+  );
 };
 
 const Tile = ({
@@ -106,7 +108,8 @@ const Tile = ({
   heldPiece,
   dropHandler,
   dragHandler,
-  dragEndHandler
+  dragEndHandler,
+  activePlayer
 }) => {
   const isValidDropTile = heldPiece?.isValidMove(tile.row, tile.col);
 
@@ -125,7 +128,17 @@ const Tile = ({
       ref={(node) => drop(node)}
       id={`${tile.chessCoords}`}
     >
-      {renderTileContents(tile, dragHandler, dragEndHandler)}
+      {tile.piece && (
+        <Piece
+          tile={tile}
+          allegiance={tile.piece.allegiance}
+          activePlayer={activePlayer}
+          dragHandler={dragHandler}
+          dragEndHandler={dragEndHandler}
+        >
+          {renderPiece(tile.piece)}
+        </Piece>
+      )}
     </td>
   );
 };
@@ -141,11 +154,28 @@ const Row = ({ tiles, ...props }) => {
 };
 
 const Board = ({ boardState, ...props }) => {
+  const [heldPiece, setHeldPiece] = useState(null);
+
+  const onDragHandler = useCallback(({ piece }) => {
+    setHeldPiece(piece);
+  }, []);
+
+  const onDragEndHandler = useCallback(() => {
+    setHeldPiece(null);
+  }, []);
+
   return (
     <table className="chessboard">
       <tbody>
         {boardState.tiles.map((tiles, i) => (
-          <Row key={i} tiles={tiles} {...props} />
+          <Row
+            key={i}
+            tiles={tiles}
+            heldPiece={heldPiece}
+            dragHandler={onDragHandler}
+            dragEndHandler={onDragEndHandler}
+            {...props}
+          />
         ))}
       </tbody>
     </table>
