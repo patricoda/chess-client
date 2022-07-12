@@ -1,57 +1,8 @@
 import { useState, useCallback } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChessKing,
-  faChessQueen,
-  faChessBishop,
-  faChessRook,
-  faChessKnight,
-  faChessPawn
-} from "@fortawesome/free-solid-svg-icons";
+
 import { PieceType } from "../enums/enums";
 import { useDrag, useDrop } from "react-dnd";
-
-const Pawn = ({ allegiance }) =>
-  allegiance === "WHITE" ? (
-    <FontAwesomeIcon icon={faChessPawn} inverse size="3x" />
-  ) : (
-    <FontAwesomeIcon icon={faChessPawn} size="3x" />
-  );
-
-const Rook = ({ allegiance }) =>
-  allegiance === "WHITE" ? (
-    <FontAwesomeIcon icon={faChessRook} inverse size="3x" />
-  ) : (
-    <FontAwesomeIcon icon={faChessRook} size="3x" />
-  );
-
-const Knight = ({ allegiance }) =>
-  allegiance === "WHITE" ? (
-    <FontAwesomeIcon icon={faChessKnight} inverse size="3x" />
-  ) : (
-    <FontAwesomeIcon icon={faChessKnight} size="3x" />
-  );
-
-const Bishop = ({ allegiance }) =>
-  allegiance === "WHITE" ? (
-    <FontAwesomeIcon icon={faChessBishop} inverse size="3x" />
-  ) : (
-    <FontAwesomeIcon icon={faChessBishop} size="3x" />
-  );
-
-const King = ({ allegiance }) =>
-  allegiance === "WHITE" ? (
-    <FontAwesomeIcon icon={faChessKing} inverse size="3x" />
-  ) : (
-    <FontAwesomeIcon icon={faChessKing} size="3x" />
-  );
-
-const Queen = ({ allegiance }) =>
-  allegiance === "WHITE" ? (
-    <FontAwesomeIcon icon={faChessQueen} inverse size="3x" />
-  ) : (
-    <FontAwesomeIcon icon={faChessQueen} size="3x" />
-  );
+import { Pawn, Rook, Knight, Bishop, King, Queen } from "./piece";
 
 const renderPiece = ({ type, allegiance }) => {
   switch (type) {
