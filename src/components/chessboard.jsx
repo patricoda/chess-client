@@ -44,11 +44,7 @@ const Piece = ({
   );
 
   return (
-    <div
-      ref={(node) =>
-        activePlayer.allegiance === allegiance ? drag(node) : node
-      }
-    >
+    <div ref={(node) => (activePlayer === allegiance ? drag(node) : node)}>
       {children}
     </div>
   );

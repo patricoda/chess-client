@@ -1,7 +1,7 @@
 import { Allegiance, DirectionOperator, PieceType } from "../enums/enums";
 import { boardDimensions } from "./values";
 
-export const generateAllMoves = (boardState) => {
+export const generateAllMoves = ({ boardState }) => {
   const populatedTiles = boardState.tiles.flat().filter((tile) => tile.piece);
   for (const tile of populatedTiles) {
     generateMoves(boardState, tile);

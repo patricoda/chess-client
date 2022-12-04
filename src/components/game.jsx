@@ -6,13 +6,10 @@ import Piece from "../classes/piece";
 import { Allegiance, PieceType } from "../enums/enums";
 import { generateAllMoves } from "../utils/moveEngine";
 
-const defaultBoardState = new BoardState();
-
 const defaultGameState = {
-  players: [
-    { allegiance: Allegiance.WHITE, isPlayerTurn: true },
-    { allegiance: Allegiance.BLACK, isPlayerTurn: false }
-  ],
+  players: [{ allegiance: Allegiance.WHITE }, { allegiance: Allegiance.BLACK }],
+  activePlayer: Allegiance.WHITE,
+  boardState: new BoardState(),
   moveHistory: []
 };
 
@@ -52,21 +49,19 @@ const setPieces = (boardState) => {
   boardState.tiles[7][5].piece = new Piece(Allegiance.WHITE, PieceType.BISHOP);
   boardState.tiles[7][6].piece = new Piece(Allegiance.WHITE, PieceType.KNIGHT);
   boardState.tiles[7][7].piece = new Piece(Allegiance.WHITE, PieceType.ROOK);
-
-  generateAllMoves(boardState);
 };
 
-const boardReducer = produce((state, action) => {
+const gameReducer = produce((state, action) => {
   switch (action.type) {
     case "SET_BOARD":
-      setPieces(state);
+      setPieces(state.boardState);
       return state;
     case "MOVE_PIECE":
-      const sourceTile = state.findTileByCoords(
+      const sourceTile = state.boardState.findTileByCoords(
         action.sourceTile.row,
         action.sourceTile.col
       );
-      const destinationTile = state.findTileByCoords(
+      const destinationTile = state.boardState.findTileByCoords(
         action.destinationTile.row,
         action.destinationTile.col
       );
@@ -75,21 +70,21 @@ const boardReducer = produce((state, action) => {
       destinationTile.piece.hasMoved = true;
       sourceTile.piece = null;
 
+      return state;
+    case "SWAP_PLAYER_TURN":
+      state.activePlayer =
+        state.activePlayer === Allegiance.WHITE
+          ? Allegiance.BLACK
+          : Allegiance.WHITE;
+
+      return state;
+    case "GENERATE_MOVES":
       generateAllMoves(state);
 
       return state;
-    default:
-      return state;
-  }
-});
-
-const gameReducer = produce((state, action) => {
-  switch (action.type) {
-    case "SWAP_PLAYER_TURN":
-      for (const player of state.players) {
-        player.isPlayerTurn = !player.isPlayerTurn;
-      }
-
+    case "CHECK_FOR_CHECK":
+      //check opponent attacking squares, if current players king, check
+      //if current players king cannot avoid, checkmate
       return state;
     default:
       return state;
@@ -97,34 +92,41 @@ const gameReducer = produce((state, action) => {
 });
 
 const Game = () => {
-  const [boardState, boardDispatch] = useReducer(
-    boardReducer,
-    defaultBoardState
-  );
-  const [gameState, gameDispatch] = useReducer(gameReducer, defaultGameState);
-  const activePlayer = gameState.players.find((player) => player.isPlayerTurn);
+  const [gameState, dispatch] = useReducer(gameReducer, defaultGameState);
 
   const onDropHandler = useCallback((sourceTile, dropTile) => {
-    boardDispatch({
+    dispatch({
       type: "MOVE_PIECE",
       sourceTile,
       destinationTile: dropTile
     });
 
-    gameDispatch({
+    dispatch({
       type: "SWAP_PLAYER_TURN"
+    });
+
+    dispatch({
+      type: "GENERATE_MOVES"
+    });
+
+    dispatch({
+      type: "CHECK_FOR_CHECK"
     });
   }, []);
 
   useEffect(() => {
-    boardDispatch({ type: "SET_BOARD" });
+    dispatch({ type: "SET_BOARD" });
+
+    dispatch({
+      type: "GENERATE_MOVES"
+    });
   }, []);
 
   return (
     <Chessboard
-      boardState={boardState}
       dropHandler={onDropHandler}
-      activePlayer={activePlayer}
+      boardState={gameState.boardState}
+      activePlayer={gameState.activePlayer}
     />
   );
 };
