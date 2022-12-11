@@ -4,11 +4,16 @@ import BoardState from "../classes/board/boardState";
 import Chessboard from "./chessboard";
 import Piece from "../classes/piece";
 import { Allegiance, PieceType } from "../enums/enums";
-import { generateAllMoves } from "../utils/moveEngine";
+import {
+  generateMovesForActivePlayer,
+  isCheckmate,
+  isKingInCheck
+} from "../utils/engine";
 
 const defaultGameState = {
-  players: [{ allegiance: Allegiance.WHITE }, { allegiance: Allegiance.BLACK }],
   activePlayer: Allegiance.WHITE,
+  kingInCheck: false,
+  isCheckmate: false,
   boardState: new BoardState(),
   moveHistory: []
 };
@@ -78,13 +83,21 @@ const gameReducer = produce((state, action) => {
           : Allegiance.WHITE;
 
       return state;
+    case "VERIFY_KING_IN_CHECK":
+      //need to generate moves for enemy player here to determine attacking squares...
+      if (isKingInCheck(state)) {
+        state.kingInCheck = true;
+      }
+      return state;
     case "GENERATE_MOVES":
-      generateAllMoves(state);
+      generateMovesForActivePlayer(state);
 
       return state;
-    case "CHECK_FOR_CHECK":
-      //check opponent attacking squares, if current players king, check
-      //if current players king cannot avoid, checkmate
+    case "DETERMINE_CHECKMATE":
+      if (isCheckmate(state)) {
+        state.isCheckmate = true;
+        alert(`checkmate! ${state.activePlayer} loses!`);
+      }
       return state;
     default:
       return state;
@@ -106,11 +119,15 @@ const Game = () => {
     });
 
     dispatch({
+      type: "VERIFY_KING_IN_CHECK"
+    });
+
+    dispatch({
       type: "GENERATE_MOVES"
     });
 
     dispatch({
-      type: "CHECK_FOR_CHECK"
+      type: "DETERMINE_CHECKMATE"
     });
   }, []);
 
