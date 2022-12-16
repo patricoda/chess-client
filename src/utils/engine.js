@@ -1,12 +1,19 @@
-import { Allegiance, DirectionOperator, PieceType } from "../enums/enums";
+import {
+  Allegiance,
+  DirectionOperator,
+  PieceType,
+  SlidingPieceType
+} from "../enums/enums";
 import { boardDimensions } from "./values";
 
 //TODO: put entire engine in hook with state for board? removes need to pass through and recalculate per reducer call
 //definitely efficiencies to make here i.e. store positions, etc
-export const isKingInCheck = ({ boardState, activePlayer }) => {
+export const getCheckingPieces = ({ boardState, activePlayer }) => {
   const tiles = boardState.tiles;
   const flatTileArray = boardState.tiles.flat();
 
+  //test moves from king tile for different types of movement type, and see if that piece is present
+  //to determine
   const kingTile = flatTileArray.find(
     ({ piece }) =>
       piece?.type === PieceType.KING && piece?.allegiance === activePlayer
@@ -17,36 +24,73 @@ export const isKingInCheck = ({ boardState, activePlayer }) => {
       ? DirectionOperator.PLUS
       : DirectionOperator.MINUS;
 
-  //test moves from king tile for different types of movement type, and see if that piece is present
-  //to determine
-  return (
-    getPawnCaptureMoves(tiles, kingTile, direction).some(({ row, col }) => {
-      const { piece } = boardState.findTileByCoords(row, col);
-      return (
-        piece?.type === PieceType.PAWN && piece?.allegiance !== activePlayer
-      );
-    }) ||
-    getKnightMoves(tiles, kingTile).some(({ row, col }) => {
-      const { piece } = boardState.findTileByCoords(row, col);
-      return (
-        piece?.type === PieceType.KNIGHT && piece?.allegiance !== activePlayer
-      );
-    }) ||
-    getLateralMoves(tiles, kingTile).some(({ row, col }) => {
-      const { piece } = boardState.findTileByCoords(row, col);
-      return (
-        (piece?.type === PieceType.ROOK || piece?.type === PieceType.QUEEN) &&
+  const pawnAttackTiles = getPawnCaptureMoves(
+    tiles,
+    kingTile,
+    direction
+  ).reduce((acc, { row, col }) => {
+    const tile = boardState.findTileByCoords(row, col);
+    const { piece } = tile;
+
+    return piece?.type === PieceType.PAWN && piece?.allegiance !== activePlayer
+      ? [...acc, tile]
+      : acc;
+  }, []);
+
+  const knightAttackTiles = getKnightMoves(tiles, kingTile).reduce(
+    (acc, { row, col }) => {
+      const tile = boardState.findTileByCoords(row, col);
+      const { piece } = tile;
+
+      return piece?.type === PieceType.KNIGHT &&
         piece?.allegiance !== activePlayer
-      );
-    }) ||
-    getDiagonalMoves(tiles, kingTile).some(({ row, col }) => {
-      const { piece } = boardState.findTileByCoords(row, col);
-      return (
-        (piece?.type === PieceType.BISHOP || piece?.type === PieceType.QUEEN) &&
-        piece?.allegiance !== activePlayer
-      );
-    })
+        ? [...acc, tile]
+        : acc;
+    },
+    []
   );
+
+  const lateralAttackTiles = getLateralMoves(tiles, kingTile).reduce(
+    (acc, { row, col }) => {
+      const tile = boardState.findTileByCoords(row, col);
+      const { piece } = tile;
+
+      return (piece?.type === PieceType.ROOK ||
+        piece?.type === PieceType.QUEEN) &&
+        piece?.allegiance !== activePlayer
+        ? [...acc, tile]
+        : acc;
+    },
+    []
+  );
+
+  const diagonalAttackTiles = getDiagonalMoves(tiles, kingTile).reduce(
+    (acc, { row, col }) => {
+      const tile = boardState.findTileByCoords(row, col);
+      const { piece } = tile;
+
+      return (piece?.type === PieceType.BISHOP ||
+        piece?.type === PieceType.QUEEN) &&
+        piece?.allegiance !== activePlayer
+        ? [...acc, tile]
+        : acc;
+    },
+    []
+  );
+
+  const attackTiles = [
+    ...pawnAttackTiles,
+    ...knightAttackTiles,
+    ...lateralAttackTiles,
+    ...diagonalAttackTiles
+  ];
+
+  //update valid moves for any checking pieces to resolve checked players moves correctly
+  for (const tile of attackTiles) {
+    generatePieceMoves(boardState, tile);
+  }
+
+  return attackTiles;
 };
 
 export const isCheckmate = ({ boardState, activePlayer, kingInCheck }) => {
@@ -66,26 +110,44 @@ export const isCheckmate = ({ boardState, activePlayer, kingInCheck }) => {
 export const generateMovesForActivePlayer = ({
   boardState,
   activePlayer,
-  kingInCheck
+  checkState: { inCheck, checkingPieces }
 }) => {
   const populatedTiles = boardState.tiles
     .flat()
     .filter((tile) => tile.piece?.allegiance === activePlayer);
 
-  if (kingInCheck) {
+  //TODO: need to determine things like pins and blah
+  for (const tile of populatedTiles) {
+    generatePieceMoves(boardState, tile);
+  }
+
+  if (inCheck) {
     const kingTile = populatedTiles.find(
       (tile) =>
         tile.piece.type === PieceType.KING &&
         tile.piece.allegiance === activePlayer
     );
 
-    //TODO: will need to expand on this, as other pieces may be able to block the attack
-    //or capture the piece making check
-    //generatePieceMoves(boardState, kingTile, activePlayer);
-  } else {
-    //TODO: need to determine things like pins and blah
-    for (const tile of populatedTiles) {
-      generatePieceMoves(boardState, tile);
+    //if multiple checkers, only king moves are valid
+    if (checkingPieces.length === 1) {
+      const [checkingTile] = checkingPieces;
+      const { piece: checkingPiece } = checkingTile;
+      //if checker is a sliding piece, check for blocking / capture moves
+      const isSlidingPiece = !!SlidingPieceType[checkingPiece.type];
+
+      for (const tile of populatedTiles) {
+        //TODO: could make this more efficient by checking for this scenario when generating piece moves in the first place
+        if (isSlidingPiece) {
+          tile.piece.validMoves = tile.piece.validMoves.filter(
+            ({ row, col }) =>
+              (checkingTile.row === row && checkingTile.col === col) ||
+              checkingPiece.validMoves.find(
+                (checkingPieceMove) =>
+                  checkingPieceMove.row === row && checkingPieceMove.col === col
+              )
+          );
+        }
+      }
     }
   }
 };

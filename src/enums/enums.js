@@ -12,6 +12,12 @@ export const PieceType = Object.freeze({
   KNIGHT: "KNIGHT"
 });
 
+export const SlidingPieceType = Object.freeze({
+  QUEEN: "QUEEN",
+  ROOK: "ROOK",
+  BISHOP: "BISHOP"
+});
+
 export const DirectionOperator = Object.freeze({
   PLUS: "PLUS",
   MINUS: "MINUS"

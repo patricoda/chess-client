@@ -7,13 +7,13 @@ import { Allegiance, PieceType } from "../enums/enums";
 import {
   generateMovesForActivePlayer,
   isCheckmate,
-  isKingInCheck
+  getCheckingPieces
 } from "../utils/engine";
 
 const defaultGameState = {
   activePlayer: Allegiance.WHITE,
   kingInCheck: false,
-  isCheckmate: false,
+  checkState: { inCheck: false, checkingPieces: [] },
   boardState: new BoardState(),
   moveHistory: []
 };
@@ -83,11 +83,11 @@ const gameReducer = produce((state, action) => {
           : Allegiance.WHITE;
 
       return state;
-    case "VERIFY_KING_IN_CHECK":
-      //need to generate moves for enemy player here to determine attacking squares...
-      if (isKingInCheck(state)) {
-        state.kingInCheck = true;
-      }
+    case "EVALUATE_CHECK_STATE":
+      const checkingPieces = getCheckingPieces(state);
+
+      state.checkState = { inCheck: !!checkingPieces.length, checkingPieces };
+
       return state;
     case "GENERATE_MOVES":
       generateMovesForActivePlayer(state);
@@ -119,7 +119,7 @@ const Game = () => {
     });
 
     dispatch({
-      type: "VERIFY_KING_IN_CHECK"
+      type: "EVALUATE_CHECK_STATE"
     });
 
     dispatch({
