@@ -5,7 +5,7 @@ import Chessboard from "./chessboard";
 import Piece from "../classes/piece";
 import { Allegiance, PieceType } from "../enums/enums";
 import {
-  generateMovesForActivePlayer,
+  refreshBoardState,
   isCheckmate,
   getCheckingPieces
 } from "../utils/engine";
@@ -90,7 +90,7 @@ const gameReducer = produce((state, action) => {
 
       return state;
     case "GENERATE_MOVES":
-      generateMovesForActivePlayer(state);
+      refreshBoardState(state);
 
       return state;
     case "DETERMINE_CHECKMATE":

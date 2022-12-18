@@ -24,7 +24,7 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
       ? DirectionOperator.PLUS
       : DirectionOperator.MINUS;
 
-  const pawnAttackTiles = getPawnCaptureMoves(
+  const pawnCheckingTiles = getPawnCaptureMoves(
     tiles,
     kingTile,
     direction
@@ -37,7 +37,7 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
       : acc;
   }, []);
 
-  const knightAttackTiles = getKnightMoves(tiles, kingTile).reduce(
+  const knightCheckingTiles = getKnightMoves(tiles, kingTile).reduce(
     (acc, { row, col }) => {
       const tile = boardState.findTileByCoords(row, col);
       const { piece } = tile;
@@ -50,7 +50,7 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
     []
   );
 
-  const lateralAttackTiles = getLateralMoves(tiles, kingTile).reduce(
+  const lateralCheckingTiles = getLateralMoves(tiles, kingTile).reduce(
     (acc, { row, col }) => {
       const tile = boardState.findTileByCoords(row, col);
       const { piece } = tile;
@@ -64,7 +64,7 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
     []
   );
 
-  const diagonalAttackTiles = getDiagonalMoves(tiles, kingTile).reduce(
+  const diagonalCheckingTiles = getDiagonalMoves(tiles, kingTile).reduce(
     (acc, { row, col }) => {
       const tile = boardState.findTileByCoords(row, col);
       const { piece } = tile;
@@ -78,54 +78,56 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
     []
   );
 
-  const attackTiles = [
-    ...pawnAttackTiles,
-    ...knightAttackTiles,
-    ...lateralAttackTiles,
-    ...diagonalAttackTiles
+  const checkingTiles = [
+    ...pawnCheckingTiles,
+    ...knightCheckingTiles,
+    ...lateralCheckingTiles,
+    ...diagonalCheckingTiles
   ];
 
-  //update valid moves for any checking pieces to resolve checked players moves correctly
-  for (const tile of attackTiles) {
-    generatePieceMoves(boardState, tile);
-  }
-
-  return attackTiles;
+  return checkingTiles;
 };
 
-export const isCheckmate = ({ boardState, activePlayer, kingInCheck }) => {
-  if (kingInCheck) {
+export const isCheckmate = ({ boardState, activePlayer, checkState }) => {
+  if (checkState.inCheck) {
     const flattenedTileArray = boardState.tiles.flat();
 
-    const kingTile = flattenedTileArray.find(
-      (tile) =>
-        tile.piece?.type === PieceType.KING &&
-        tile.piece?.allegiance === activePlayer
+    const tilesWithValidMoves = flattenedTileArray.filter(
+      ({ piece }) =>
+        piece?.allegiance === activePlayer && piece.validMoves.length
     );
 
-    return !!!kingTile.piece.validMoves.length;
+    return !!!tilesWithValidMoves.length;
   }
 };
 
-export const generateMovesForActivePlayer = ({
+export const refreshBoardState = ({
   boardState,
   activePlayer,
   checkState: { inCheck, checkingPieces }
 }) => {
-  const populatedTiles = boardState.tiles
-    .flat()
-    .filter((tile) => tile.piece?.allegiance === activePlayer);
+  const tiles = boardState.tiles.flat();
+
+  const currentPlayerPopulatedTiles = tiles.filter(
+    (tile) => tile.piece?.allegiance === activePlayer
+  );
+  const otherPlayerPopulatedTiles = tiles.filter(
+    (tile) => tile.piece && tile.piece.allegiance !== activePlayer
+  );
+
+  const allPopulatedTiles = [
+    ...otherPlayerPopulatedTiles,
+    ...currentPlayerPopulatedTiles
+  ];
 
   //TODO: need to determine things like pins and blah
-  for (const tile of populatedTiles) {
-    generatePieceMoves(boardState, tile);
+  for (const tile of allPopulatedTiles) {
+    generatePieceMoves(boardState, tile, activePlayer);
   }
 
   if (inCheck) {
-    const kingTile = populatedTiles.find(
-      (tile) =>
-        tile.piece.type === PieceType.KING &&
-        tile.piece.allegiance === activePlayer
+    const kingTile = currentPlayerPopulatedTiles.find(
+      (tile) => tile.piece.type === PieceType.KING
     );
 
     //if multiple checkers, only king moves are valid
@@ -134,29 +136,88 @@ export const generateMovesForActivePlayer = ({
       const { piece: checkingPiece } = checkingTile;
       //if checker is a sliding piece, check for blocking / capture moves
       const isSlidingPiece = !!SlidingPieceType[checkingPiece.type];
+      let tilesInCheck = [];
+      let allTilesInCheck = [];
 
-      for (const tile of populatedTiles) {
+      //get tiles on shared line between king and checking piece to evaluate blockers and escape moves
+      if (isSlidingPiece) {
+        //TODO: should return both actual and pseudo tiles rather than loop twice
+        tilesInCheck = getDirectLineBetweenTiles(
+          boardState,
+          checkingTile,
+          kingTile,
+          false
+        );
+
+        allTilesInCheck = getDirectLineBetweenTiles(
+          boardState,
+          checkingTile,
+          kingTile,
+          true
+        );
+      }
+
+      for (const tile of currentPlayerPopulatedTiles) {
         //TODO: could make this more efficient by checking for this scenario when generating piece moves in the first place
-        if (isSlidingPiece) {
+        if (tile !== kingTile) {
           tile.piece.validMoves = tile.piece.validMoves.filter(
             ({ row, col }) =>
               (checkingTile.row === row && checkingTile.col === col) ||
-              checkingPiece.validMoves.find(
-                (checkingPieceMove) =>
-                  checkingPieceMove.row === row && checkingPieceMove.col === col
-              )
+              tilesInCheck.find((tile) => tile.row === row && tile.col === col)
           );
         }
+
+        //TODO: I think we could evaluate tilesInCheck earlier and deal with this in generate moves
+        //make sure we remove any king tiles that are in direct line of fire
+        /*TODO: need to ensure king tiles are filtered correctly:
+         - needs to filter out all attacked tiles
+         - needs to filter out all pseudo moves to ensure correct escape 
+         - needs to ensure any capture moves don't put king in check, too
+        kingTile.piece.validMoves.filter(
+          ({ row, col }) =>
+            (checkingTile.row === row && checkingTile.col === col) ||
+            !allTilesInCheck.some(
+              (tile) => tile.row === row && tile.col === col
+            )
+        );*/
       }
     }
   }
 };
 
-export const generateAllMoves = ({ boardState }) => {
-  const populatedTiles = boardState.tiles.flat().filter((tile) => tile.piece);
-  for (const tile of populatedTiles) {
-    generatePieceMoves(boardState, tile);
-  }
+//get direct tile coordinates on line shared between two tiles
+const getDirectLineBetweenTiles = (
+  { tiles },
+  tile1,
+  tile2,
+  includePseudoTiles
+) => {
+  const { row: tile1Row, col: tile1Col } = tile1;
+  const { row: tile2Row, col: tile2Col } = tile2;
+
+  //determine direction towards king
+  const rowDirection =
+    tile2Row > tile1Row
+      ? DirectionOperator.PLUS
+      : tile2Row < tile1Row
+      ? DirectionOperator.MINUS
+      : null;
+
+  const colDirection =
+    tile2Col > tile1Col
+      ? DirectionOperator.PLUS
+      : tile2Col < tile1Col
+      ? DirectionOperator.MINUS
+      : null;
+
+  return generateMovesInDirection(
+    tiles,
+    rowDirection,
+    colDirection,
+    boardDimensions.rows,
+    tile1,
+    includePseudoTiles
+  );
 };
 
 export const generatePieceMoves = ({ tiles }, actionedTile, activePlayer) => {
@@ -175,15 +236,18 @@ export const generatePieceMoves = ({ tiles }, actionedTile, activePlayer) => {
       validMoves.push(...getDiagonalMoves(tiles, actionedTile));
       break;
     case PieceType.KING:
-      //keep this somewhere
+      //TODO: keep this somewhere
       const attackedTiles = tiles
         .flat()
         .filter((tile) => tile.piece && tile.piece.allegiance !== activePlayer)
         .reduce((current, { piece }) => [...current, ...piece.validMoves], []);
 
       validMoves.push(
-        ...getOmnidirectionalMoves(tiles, actionedTile, 2).filter((move) =>
-          attackedTiles.includes(move)
+        ...getOmnidirectionalMoves(tiles, actionedTile, 2).filter(
+          (move) =>
+            !attackedTiles.some(
+              ({ row, col }) => move.row === row && move.col === col
+            )
         )
       );
       break;
@@ -368,7 +432,8 @@ const generateMovesInDirection = (
   rowDirection,
   colDirection,
   distanceLimit,
-  { row: pieceRow, col: pieceCol, piece: actionedPiece }
+  { row: pieceRow, col: pieceCol, piece: actionedPiece },
+  generatePseudoMoves = false
 ) => {
   const moves = [];
 
@@ -381,7 +446,7 @@ const generateMovesInDirection = (
     if (tile) {
       const { row, col, piece } = tile;
 
-      if (piece) {
+      if (!generatePseudoMoves && piece) {
         if (piece.isCapturable(actionedPiece)) {
           moves.push({ row, col });
         }
