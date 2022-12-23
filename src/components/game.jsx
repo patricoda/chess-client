@@ -9,6 +9,7 @@ import {
   isCheckmate,
   getCheckingPieces
 } from "../utils/engine";
+import Pawn from "../classes/pawn";
 
 const defaultGameState = {
   activePlayer: Allegiance.WHITE,
@@ -28,23 +29,23 @@ const setPieces = (boardState) => {
   boardState.tiles[0][6].piece = new Piece(Allegiance.BLACK, PieceType.KNIGHT);
   boardState.tiles[0][7].piece = new Piece(Allegiance.BLACK, PieceType.ROOK);
 
-  boardState.tiles[1][0].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
-  boardState.tiles[1][1].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
-  boardState.tiles[1][2].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
-  boardState.tiles[1][3].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
-  boardState.tiles[1][4].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
-  boardState.tiles[1][5].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
-  boardState.tiles[1][6].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
-  boardState.tiles[1][7].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
+  boardState.tiles[1][0].piece = new Pawn(Allegiance.BLACK);
+  boardState.tiles[1][1].piece = new Pawn(Allegiance.BLACK);
+  boardState.tiles[1][2].piece = new Pawn(Allegiance.BLACK);
+  boardState.tiles[1][3].piece = new Pawn(Allegiance.BLACK);
+  boardState.tiles[1][4].piece = new Pawn(Allegiance.BLACK);
+  boardState.tiles[1][5].piece = new Pawn(Allegiance.BLACK);
+  boardState.tiles[1][6].piece = new Pawn(Allegiance.BLACK);
+  boardState.tiles[1][7].piece = new Pawn(Allegiance.BLACK);
 
-  boardState.tiles[6][0].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
-  boardState.tiles[6][1].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
-  boardState.tiles[6][2].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
-  boardState.tiles[6][3].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
-  boardState.tiles[6][4].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
-  boardState.tiles[6][5].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
-  boardState.tiles[6][6].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
-  boardState.tiles[6][7].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
+  boardState.tiles[6][0].piece = new Pawn(Allegiance.WHITE);
+  boardState.tiles[6][1].piece = new Pawn(Allegiance.WHITE);
+  boardState.tiles[6][2].piece = new Pawn(Allegiance.WHITE);
+  boardState.tiles[6][3].piece = new Pawn(Allegiance.WHITE);
+  boardState.tiles[6][4].piece = new Pawn(Allegiance.WHITE);
+  boardState.tiles[6][5].piece = new Pawn(Allegiance.WHITE);
+  boardState.tiles[6][6].piece = new Pawn(Allegiance.WHITE);
+  boardState.tiles[6][7].piece = new Pawn(Allegiance.WHITE);
 
   boardState.tiles[7][0].piece = new Piece(Allegiance.WHITE, PieceType.ROOK);
   boardState.tiles[7][1].piece = new Piece(Allegiance.WHITE, PieceType.KNIGHT);
@@ -140,11 +141,14 @@ const Game = () => {
   }, []);
 
   return (
-    <Chessboard
-      dropHandler={onDropHandler}
-      boardState={gameState.boardState}
-      activePlayer={gameState.activePlayer}
-    />
+    <>
+      <div>{gameState.checkState.inCheck.toString()}</div>
+      <Chessboard
+        dropHandler={onDropHandler}
+        boardState={gameState.boardState}
+        activePlayer={gameState.activePlayer}
+      />
+    </>
   );
 };
 
