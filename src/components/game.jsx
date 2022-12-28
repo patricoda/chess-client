@@ -7,7 +7,8 @@ import { Allegiance, PieceType } from "../enums/enums";
 import {
   refreshBoardState,
   isCheckmate,
-  getCheckingPieces
+  getCheckingPieces,
+  movePiece
 } from "../utils/engine";
 import Pawn from "../classes/pawn";
 
@@ -61,20 +62,10 @@ const gameReducer = produce((state, action) => {
   switch (action.type) {
     case "SET_BOARD":
       setPieces(state.boardState);
+
       return state;
     case "MOVE_PIECE":
-      const sourceTile = state.boardState.findTileByCoords(
-        action.sourceTile.row,
-        action.sourceTile.col
-      );
-      const destinationTile = state.boardState.findTileByCoords(
-        action.destinationTile.row,
-        action.destinationTile.col
-      );
-
-      destinationTile.piece = sourceTile.piece;
-      destinationTile.piece.hasMoved = true;
-      sourceTile.piece = null;
+      movePiece(state.boardState, action.sourceTile, action.destinationTile);
 
       return state;
     case "SWAP_PLAYER_TURN":
@@ -86,7 +77,6 @@ const gameReducer = produce((state, action) => {
       return state;
     case "EVALUATE_CHECK_STATE":
       const checkingPieces = getCheckingPieces(state);
-
       state.checkState = { inCheck: !!checkingPieces.length, checkingPieces };
 
       return state;

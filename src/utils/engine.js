@@ -171,20 +171,42 @@ export const refreshBoardState = ({
   }
 
   //filter king moves based on attacking tiles, etc
-  generateLegalKingMoves(boardState, kingTile, attackedTiles);
+  generateLegalKingMoves(boardState, kingTile, activePlayer);
 };
 
-export const generateLegalKingMoves = ({ tiles }, kingTile, attackedTiles) => {
+export const movePiece = (
+  boardState,
+  { row: sourceRow, col: sourceCol },
+  { row: destRow, col: destCol }
+) => {
+  const sourceTile = boardState.findTileByCoords(sourceRow, sourceCol);
+
+  const destinationTile = boardState.findTileByCoords(destRow, destCol);
+
+  destinationTile.piece = sourceTile.piece;
+  destinationTile.piece.hasMoved = true;
+  sourceTile.piece = null;
+};
+
+export const generateLegalKingMoves = (boardState, kingTile, activePlayer) => {
+  //for each move, move the king temporarily, and see if it would be in check
   kingTile.piece.validMoves = kingTile.piece.validMoves.filter((move) => {
-    const moveIsAttacked = attackedTiles.some(
-      ({ row, col }) => move.row === row && move.col === col
-    );
+    const destinationTile = boardState.findTileByCoords(move.row, move.col);
+    const kingPiece = kingTile.piece;
+    const piece = destinationTile.piece;
 
-    //TODO: for each capture move, determine whether or not it would put the king in check
-    //TODO: for each move, determine whether or not it is also checked by checking piece
-    //do i just need pseudo moves..?
+    destinationTile.piece = kingTile.piece;
+    kingTile.piece = null;
 
-    return !moveIsAttacked;
+    const tileIsAttacked = !!getCheckingPieces({
+      boardState,
+      activePlayer
+    }).length;
+
+    destinationTile.piece = piece;
+    kingTile.piece = kingPiece;
+
+    return !tileIsAttacked;
   });
 };
 
