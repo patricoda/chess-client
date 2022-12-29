@@ -88,6 +88,97 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
   return checkingTiles;
 };
 
+const generateLegalPieceMoves = (boardState, kingTile) => {
+  const tiles = boardState.tiles;
+  const flatTileArray = boardState.tiles.flat();
+
+  const lateralAttackingTiles = getLateralMoves(
+    tiles,
+    kingTile,
+    boardDimensions.rows,
+    true
+  ).reduce((acc, { row, col }) => {
+    const tile = boardState.findTileByCoords(row, col);
+    const { piece } = tile;
+
+    return (piece?.type === PieceType.ROOK ||
+      piece?.type === PieceType.QUEEN) &&
+      piece?.allegiance !== kingTile.piece.allegiance
+      ? [...acc, tile]
+      : acc;
+  }, []);
+
+  const diagonalAttackingTiles = getDiagonalMoves(
+    tiles,
+    kingTile,
+    boardDimensions.rows,
+    true
+  ).reduce((acc, { row, col }) => {
+    const tile = boardState.findTileByCoords(row, col);
+    const { piece } = tile;
+
+    return (piece?.type === PieceType.BISHOP ||
+      piece?.type === PieceType.QUEEN) &&
+      piece?.allegiance !== kingTile.piece.allegiance
+      ? [...acc, tile]
+      : acc;
+  }, []);
+
+  for (const attackingTile of [
+    ...lateralAttackingTiles,
+    ...diagonalAttackingTiles
+  ]) {
+    //TODO: consider getDirectLineBetweenTiles returning tiles not coords..?
+    const inbetweenTileCoords = getDirectLineBetweenTiles(
+      boardState,
+      attackingTile,
+      kingTile,
+      true
+    );
+
+    const inbetweenTilesWithPieces = flatTileArray.filter(
+      (tile) =>
+        tile !== kingTile &&
+        tile.piece &&
+        inbetweenTileCoords.find(({ row, col }) => {
+          return tile.row === row && tile.col === col;
+        })
+    );
+
+    //if there is a single piece between an opposing sliding piece and the king, it is pinned
+    if (inbetweenTilesWithPieces.length === 1) {
+      const piece = inbetweenTilesWithPieces[0].piece;
+
+      if (piece.allegiance !== kingTile.piece.allegiance) {
+        continue;
+      } else {
+        if (piece.type === PieceType.PAWN) {
+          piece.pushMoves = piece.pushMoves.filter((move) =>
+            inbetweenTileCoords.some(
+              ({ row, col }) => move.row === row && move.col === col
+            )
+          );
+
+          piece.captureMoves = piece.captureMoves.filter(
+            (move) =>
+              move.row === attackingTile.row && move.col === attackingTile.col
+          );
+        } else {
+          piece.validMoves = piece.validMoves.filter(
+            ({ row, col }) =>
+              (row === attackingTile.row && col === attackingTile.col) ||
+              inbetweenTileCoords.some(
+                (tile) => row === tile.row && col === tile.col
+              )
+          );
+        }
+
+        piece.isPinned = true;
+      }
+    }
+  }
+};
+
 export const isCheckmate = ({ boardState, activePlayer, checkState }) => {
   if (checkState.inCheck) {
     const flattenedTileArray = boardState.tiles.flat();
@@ -111,59 +202,60 @@ export const refreshBoardState = ({
   const currentPlayerPopulatedTiles = tiles.filter(
     (tile) => tile.piece?.allegiance === activePlayer
   );
-  const otherPlayerPopulatedTiles = tiles.filter(
-    (tile) => tile.piece && tile.piece.allegiance !== activePlayer
-  );
 
-  const allPopulatedTiles = [
-    ...otherPlayerPopulatedTiles,
-    ...currentPlayerPopulatedTiles
-  ];
-
-  //TODO: pins, en passant, castling
-  for (const tile of allPopulatedTiles) {
-    generatePieceMoves(boardState, tile, activePlayer);
+  //TODO: en passant, castling
+  //TODO: can we check 'check' before generating pseudo moves? more efficient?
+  for (const tile of currentPlayerPopulatedTiles) {
+    generatePseudoLegalMoves(boardState, tile, activePlayer);
+    tile.piece.isPinned = false;
   }
-
-  const attackedTiles = otherPlayerPopulatedTiles.reduce(
-    (current, { piece }) => [
-      ...current,
-      ...(piece.type === PieceType.PAWN
-        ? piece.pseudoCaptureMoves
-        : piece.validMoves)
-    ],
-    []
-  );
 
   const kingTile = currentPlayerPopulatedTiles.find(
     (tile) => tile.piece.type === PieceType.KING
   );
 
-  if (inCheck) {
-    //if multiple checkers, only king moves are valid
-    if (checkingPieces.length === 1) {
-      const [checkingTile] = checkingPieces;
-      const { piece: checkingPiece } = checkingTile;
-      //if checker is a sliding piece, check for blocking / capture moves
-      const isSlidingPiece = !!SlidingPieceType[checkingPiece.type];
-      let tilesInCheck = [];
+  //if there are two checking pieces, only king moves are valid
+  if (checkingPieces.length !== 2) {
+    generateLegalPieceMoves(boardState, kingTile);
+  }
 
-      //get tiles on shared line between king and checking piece to evaluate blockers and escape moves
-      if (isSlidingPiece) {
-        tilesInCheck = getDirectLineBetweenTiles(
-          boardState,
-          checkingTile,
-          kingTile,
-          false
-        );
-      }
+  //TODO: does it make sense to have 'inCheck' passed through? just do it here and remove step?
+  //if there is only one checking piece, filter moves so that pieces can only block check
+  if (checkingPieces.length === 1) {
+    const [checkingTile] = checkingPieces;
+    const { piece: checkingPiece } = checkingTile;
+    //if checker is a sliding piece, check for blocking / capture moves
+    const isSlidingPiece = !!SlidingPieceType[checkingPiece.type];
+    let tilesInCheck = [];
 
-      for (const tile of currentPlayerPopulatedTiles) {
-        if (tile !== kingTile) {
-          tile.piece.validMoves = tile.piece.validMoves.filter(
+    //get tiles on shared line between king and checking piece to evaluate blockers and escape moves
+    if (isSlidingPiece) {
+      tilesInCheck = getDirectLineBetweenTiles(
+        boardState,
+        checkingTile,
+        kingTile
+      );
+    }
+
+    for (const tile of currentPlayerPopulatedTiles) {
+      const piece = tile.piece;
+
+      if (tile !== kingTile && !piece.isPinned) {
+        //TODO: this block is very similar to generating pins, reuse possible?
+        if (piece.type === PieceType.PAWN) {
+          piece.pushMoves = piece.pushMoves.filter(({ row, col }) =>
+            tilesInCheck.some((tile) => tile.row === row && tile.col === col)
+          );
+
+          piece.captureMoves = piece.captureMoves.filter(
+            ({ row, col }) =>
+              checkingTile.row === row && checkingTile.col === col
+          );
+        } else {
+          piece.validMoves = piece.validMoves.filter(
             ({ row, col }) =>
               (checkingTile.row === row && checkingTile.col === col) ||
-              tilesInCheck.find((tile) => tile.row === row && tile.col === col)
+              tilesInCheck.some((tile) => tile.row === row && tile.col === col)
           );
         }
       }
@@ -171,7 +263,7 @@ export const refreshBoardState = ({
   }
 
   //filter king moves based on attacking tiles, etc
-  generateLegalKingMoves(boardState, kingTile, activePlayer);
+  generateLegalKingMoves(boardState, kingTile);
 };
 
 export const movePiece = (
@@ -188,7 +280,7 @@ export const movePiece = (
   sourceTile.piece = null;
 };
 
-export const generateLegalKingMoves = (boardState, kingTile, activePlayer) => {
+export const generateLegalKingMoves = (boardState, kingTile) => {
   //for each move, move the king temporarily, and see if it would be in check
   kingTile.piece.validMoves = kingTile.piece.validMoves.filter((move) => {
     const destinationTile = boardState.findTileByCoords(move.row, move.col);
@@ -200,7 +292,7 @@ export const generateLegalKingMoves = (boardState, kingTile, activePlayer) => {
 
     const tileIsAttacked = !!getCheckingPieces({
       boardState,
-      activePlayer
+      activePlayer: kingPiece.allegiance
     }).length;
 
     destinationTile.piece = piece;
@@ -215,7 +307,7 @@ const getDirectLineBetweenTiles = (
   { tiles },
   tile1,
   tile2,
-  includePseudoTiles
+  generateMovesPastBlockers = false
 ) => {
   const { row: tile1Row, col: tile1Col } = tile1;
   const { row: tile2Row, col: tile2Col } = tile2;
@@ -241,11 +333,11 @@ const getDirectLineBetweenTiles = (
     colDirection,
     boardDimensions.rows,
     tile1,
-    includePseudoTiles
+    generateMovesPastBlockers
   );
 };
 
-export const generatePieceMoves = ({ tiles }, actionedTile) => {
+export const generatePseudoLegalMoves = ({ tiles }, actionedTile) => {
   const validMoves = [];
   const piece = actionedTile.piece;
 
@@ -363,7 +455,8 @@ const getOmnidirectionalMoves = (tiles, actionedTile, distanceLimit) => [
 const getLateralMoves = (
   tiles,
   actionedTile,
-  distanceLimit = boardDimensions.rows
+  distanceLimit = boardDimensions.rows,
+  generateMovesPastBlockers = false
 ) => {
   const moves = [];
 
@@ -373,7 +466,8 @@ const getLateralMoves = (
       DirectionOperator.MINUS,
       null,
       distanceLimit,
-      actionedTile
+      actionedTile,
+      generateMovesPastBlockers
     )
   );
 
@@ -383,7 +477,8 @@ const getLateralMoves = (
       DirectionOperator.PLUS,
       null,
       distanceLimit,
-      actionedTile
+      actionedTile,
+      generateMovesPastBlockers
     )
   );
 
@@ -393,7 +488,8 @@ const getLateralMoves = (
       null,
       DirectionOperator.MINUS,
       distanceLimit,
-      actionedTile
+      actionedTile,
+      generateMovesPastBlockers
     )
   );
 
@@ -403,7 +499,8 @@ const getLateralMoves = (
       null,
       DirectionOperator.PLUS,
       distanceLimit,
-      actionedTile
+      actionedTile,
+      generateMovesPastBlockers
     )
   );
 
@@ -413,7 +510,8 @@ const getLateralMoves = (
 const getDiagonalMoves = (
   tiles,
   actionedTile,
-  distanceLimit = boardDimensions.rows
+  distanceLimit = boardDimensions.rows,
+  generateMovesPastBlockers = false
 ) => {
   const moves = [];
 
@@ -423,7 +521,8 @@ const getDiagonalMoves = (
       DirectionOperator.MINUS,
       DirectionOperator.MINUS,
       distanceLimit,
-      actionedTile
+      actionedTile,
+      generateMovesPastBlockers
     )
   );
 
@@ -433,7 +532,8 @@ const getDiagonalMoves = (
       DirectionOperator.MINUS,
       DirectionOperator.PLUS,
       distanceLimit,
-      actionedTile
+      actionedTile,
+      generateMovesPastBlockers
     )
   );
 
@@ -443,7 +543,8 @@ const getDiagonalMoves = (
       DirectionOperator.PLUS,
       DirectionOperator.MINUS,
       distanceLimit,
-      actionedTile
+      actionedTile,
+      generateMovesPastBlockers
     )
   );
 
@@ -453,7 +554,8 @@ const getDiagonalMoves = (
       DirectionOperator.PLUS,
       DirectionOperator.PLUS,
       distanceLimit,
-      actionedTile
+      actionedTile,
+      generateMovesPastBlockers
     )
   );
 
@@ -466,7 +568,7 @@ const generateMovesInDirection = (
   colDirection,
   distanceLimit,
   { row: pieceRow, col: pieceCol, piece: actionedPiece },
-  generatePseudoMoves = false
+  generateMovesPastBlockers = false
 ) => {
   const moves = [];
 
@@ -479,7 +581,7 @@ const generateMovesInDirection = (
     if (tile) {
       const { row, col, piece } = tile;
 
-      if (!generatePseudoMoves && piece) {
+      if (!generateMovesPastBlockers && piece) {
         if (piece.isCapturable(actionedPiece)) {
           moves.push({ row, col });
         }

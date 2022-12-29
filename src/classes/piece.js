@@ -3,6 +3,7 @@ export default class Piece {
   type;
   validMoves = [];
   hasMoved = false;
+  isPinned = false;
 
   constructor(allegiance, type) {
     this.allegiance = allegiance;
