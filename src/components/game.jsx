@@ -1,5 +1,5 @@
-import { memo, useCallback, useEffect, useReducer } from "react";
-import produce from "immer";
+import { memo, useCallback, useEffect } from "react";
+import { useImmerReducer } from "use-immer";
 import BoardState from "../classes/board/boardState";
 import Chessboard from "./chessboard";
 import Piece from "../classes/piece";
@@ -14,7 +14,6 @@ import Pawn from "../classes/pawn";
 
 const defaultGameState = {
   activePlayer: Allegiance.WHITE,
-  kingInCheck: false,
   checkState: { inCheck: false, checkingPieces: [] },
   boardState: new BoardState(),
   moveHistory: []
@@ -58,7 +57,7 @@ const setPieces = (boardState) => {
   boardState.tiles[7][7].piece = new Piece(Allegiance.WHITE, PieceType.ROOK);
 };
 
-const gameReducer = produce((state, action) => {
+const gameReducer = (state, action) => {
   switch (action.type) {
     case "SET_BOARD":
       setPieces(state.boardState);
@@ -93,34 +92,37 @@ const gameReducer = produce((state, action) => {
     default:
       return state;
   }
-});
+};
 
 const Game = () => {
-  const [gameState, dispatch] = useReducer(gameReducer, defaultGameState);
+  const [gameState, dispatch] = useImmerReducer(gameReducer, defaultGameState);
 
-  const onDropHandler = useCallback((sourceTile, dropTile) => {
-    dispatch({
-      type: "MOVE_PIECE",
-      sourceTile,
-      destinationTile: dropTile
-    });
+  const onDropHandler = useCallback(
+    (sourceTile, dropTile) => {
+      dispatch({
+        type: "MOVE_PIECE",
+        sourceTile,
+        destinationTile: dropTile
+      });
 
-    dispatch({
-      type: "SWAP_PLAYER_TURN"
-    });
+      dispatch({
+        type: "SWAP_PLAYER_TURN"
+      });
 
-    dispatch({
-      type: "EVALUATE_CHECK_STATE"
-    });
+      dispatch({
+        type: "EVALUATE_CHECK_STATE"
+      });
 
-    dispatch({
-      type: "GENERATE_MOVES"
-    });
+      dispatch({
+        type: "GENERATE_MOVES"
+      });
 
-    dispatch({
-      type: "DETERMINE_CHECKMATE"
-    });
-  }, []);
+      dispatch({
+        type: "DETERMINE_CHECKMATE"
+      });
+    },
+    [dispatch]
+  );
 
   useEffect(() => {
     dispatch({ type: "SET_BOARD" });
@@ -128,7 +130,7 @@ const Game = () => {
     dispatch({
       type: "GENERATE_MOVES"
     });
-  }, []);
+  }, [dispatch]);
 
   return (
     <>
