@@ -4,7 +4,6 @@ import Piece from "./piece";
 export default class Pawn extends Piece {
   type = PieceType.PAWN;
   pushMoves = [];
-  pseudoCaptureMoves = [];
   captureMoves = [];
 
   isValidMove(row, col) {

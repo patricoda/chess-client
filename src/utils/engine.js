@@ -18,9 +18,25 @@ export const movePiece = (
 
   const sourcePiece = sourceTile.piece;
 
+  //handle en passant
+  if (sourcePiece.type === PieceType.PAWN) {
+    const enPassantPawnCoords = sourcePiece.captureMoves.find(
+      ({ row, col }) => col === destCol && row === destRow
+    )?.enPassantPawnCoords;
+
+    if (enPassantPawnCoords) {
+      const enPassantPawnTile = boardState.findTileByCoords(
+        enPassantPawnCoords.row,
+        enPassantPawnCoords.col
+      );
+
+      enPassantPawnTile.piece = null;
+    }
+  }
+
+  //handle castling
   if (sourcePiece.type === PieceType.KING && !sourcePiece.hasMoved) {
-    //find castling rook data if move made is a castling move
-    const castlingRookCoords = sourceTile.piece.validMoves.find(
+    const castlingRookCoords = sourcePiece.validMoves.find(
       ({ row, col }) => col === destCol && row === destRow
     ).castlingRookCoords;
 
@@ -260,8 +276,8 @@ const handleSingleCheck = (
   }
 };
 
-export const isCheckmate = ({ boardState, activePlayer, checkState }) => {
-  if (checkState.inCheck) {
+export const isCheckmate = ({ boardState, activePlayer, checkingPieces }) => {
+  if (checkingPieces.length) {
     const flattenedTileArray = boardState.tiles.flat();
 
     const tilesWithValidMoves = flattenedTileArray.filter(
@@ -276,7 +292,8 @@ export const isCheckmate = ({ boardState, activePlayer, checkState }) => {
 export const refreshBoardState = ({
   boardState,
   activePlayer,
-  checkState: { inCheck, checkingPieces }
+  checkingPieces,
+  moveHistory
 }) => {
   const tiles = boardState.tiles.flat();
 
@@ -290,7 +307,11 @@ export const refreshBoardState = ({
   //TODO: handle removal of moves / don't generate when checked by 2 or more pieces
 
   for (const tile of currentPlayerPopulatedTiles) {
-    generatePseudoLegalMoves(boardState, tile, activePlayer);
+    generatePseudoLegalMoves(
+      boardState,
+      tile,
+      moveHistory[moveHistory.length - 1]
+    );
     tile.piece.isPinned = false;
   }
 
@@ -380,19 +401,23 @@ const getDirectLineBetweenTiles = (
   );
 };
 
-export const generatePseudoLegalMoves = ({ tiles }, actionedTile) => {
+export const generatePseudoLegalMoves = (
+  { tiles },
+  actionedTile,
+  mostRecentMove
+) => {
   const validMoves = [];
   const piece = actionedTile.piece;
 
   switch (piece.type) {
     case PieceType.PAWN:
-      const { pushMoves, captureMoves, pseudoCaptureMoves } = getPawnMoves(
+      const { pushMoves, captureMoves } = getPawnMoves(
         tiles,
-        actionedTile
+        actionedTile,
+        mostRecentMove
       );
       piece.pushMoves = pushMoves;
       piece.captureMoves = captureMoves;
-      piece.pseudoCaptureMoves = pseudoCaptureMoves;
       return;
     case PieceType.ROOK:
       validMoves.push(...getLateralMoves(tiles, actionedTile));
@@ -471,7 +496,7 @@ const getCastlingMoves = (tiles, kingTile) => {
   return castlingMoves;
 };
 
-const getPawnMoves = (tiles, actionedTile) => {
+const getPawnMoves = (tiles, actionedTile, mostRecentMove) => {
   const direction =
     actionedTile.piece.allegiance === Allegiance.BLACK
       ? DirectionOperator.PLUS
@@ -480,12 +505,15 @@ const getPawnMoves = (tiles, actionedTile) => {
   //pawns follow different rules for movement / capturing pieces
   const pushMoves = getPawnPushMoves(tiles, actionedTile, direction);
 
-  const { pseudoMoves: pseudoCaptureMoves, legalMoves: captureMoves } =
-    getPawnCaptureMoves(tiles, actionedTile, direction);
+  const { legalMoves: captureMoves } = getPawnCaptureMoves(
+    tiles,
+    actionedTile,
+    direction,
+    mostRecentMove
+  );
 
   return {
     pushMoves,
-    pseudoCaptureMoves,
     captureMoves
   };
 };
@@ -501,14 +529,15 @@ const getPawnPushMoves = (tiles, { row, col, piece }, direction) =>
       col
     }));
 
-const getPawnCaptureMoves = (tiles, { row, col, piece }, direction) => {
+const getPawnCaptureMoves = (
+  tiles,
+  { row, col, piece },
+  direction,
+  mostRecentMove
+) => {
   const pseudoMoves = [
-    tiles[nextTile(row, 1, direction)]?.[
-      nextTile(col, 1, DirectionOperator.PLUS)
-    ],
-    tiles[nextTile(row, 1, direction)]?.[
-      nextTile(col, 1, DirectionOperator.MINUS)
-    ]
+    tiles[nextTile(row, 1, direction)]?.[col + 1],
+    tiles[nextTile(row, 1, direction)]?.[col - 1]
   ]
     .filter((tile) => tile)
     .map(({ row, col }) => ({
@@ -516,8 +545,35 @@ const getPawnCaptureMoves = (tiles, { row, col, piece }, direction) => {
       col
     }));
 
-  const legalMoves = pseudoMoves.filter(({ row, col }) =>
-    tiles[row][col].piece?.isCapturable(piece)
+  //check for en passant
+  if (
+    mostRecentMove?.source.piece.type === PieceType.PAWN &&
+    Math.abs(mostRecentMove.source.row - mostRecentMove.destination.row) === 2
+  ) {
+    const adjacentTiles = [tiles[row]?.[col + 1], tiles[row]?.[col - 1]];
+
+    const enPassantTile = adjacentTiles.find(
+      (tile) =>
+        tile &&
+        tile.row === mostRecentMove.destination.row &&
+        tile.col === mostRecentMove.destination.col
+    );
+
+    if (enPassantTile) {
+      pseudoMoves.push({
+        row: nextTile(row, 1, direction),
+        col: enPassantTile.col,
+        enPassantPawnCoords: {
+          row: enPassantTile.row,
+          col: enPassantTile.col
+        }
+      });
+    }
+  }
+
+  const legalMoves = pseudoMoves.filter(
+    ({ row, col, enPassantPawnCoords }) =>
+      tiles[row][col].piece?.isCapturable(piece) || !!enPassantPawnCoords
   );
 
   return { pseudoMoves, legalMoves };

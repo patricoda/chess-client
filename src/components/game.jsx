@@ -14,8 +14,8 @@ import Pawn from "../classes/pawn";
 
 const defaultGameState = {
   activePlayer: Allegiance.WHITE,
-  checkState: { inCheck: false, checkingPieces: [] },
   boardState: new BoardState(),
+  checkingPieces: [],
   moveHistory: []
 };
 
@@ -66,6 +66,18 @@ const gameReducer = (state, action) => {
     case "MOVE_PIECE":
       movePiece(state.boardState, action.sourceTile, action.destinationTile);
 
+      state.moveHistory.push({
+        source: {
+          row: action.sourceTile.row,
+          col: action.sourceTile.col,
+          piece: action.sourceTile.piece
+        },
+        destination: {
+          row: action.destinationTile.row,
+          col: action.destinationTile.col
+        }
+      });
+
       return state;
     case "SWAP_PLAYER_TURN":
       state.activePlayer =
@@ -75,8 +87,7 @@ const gameReducer = (state, action) => {
 
       return state;
     case "EVALUATE_CHECK_STATE":
-      const checkingPieces = getCheckingPieces(state);
-      state.checkState = { inCheck: !!checkingPieces.length, checkingPieces };
+      state.checkingPieces = getCheckingPieces(state);
 
       return state;
     case "GENERATE_MOVES":
@@ -133,14 +144,11 @@ const Game = () => {
   }, [dispatch]);
 
   return (
-    <>
-      <div>{gameState.checkState.inCheck.toString()}</div>
-      <Chessboard
-        dropHandler={onDropHandler}
-        boardState={gameState.boardState}
-        activePlayer={gameState.activePlayer}
-      />
-    </>
+    <Chessboard
+      dropHandler={onDropHandler}
+      boardState={gameState.boardState}
+      activePlayer={gameState.activePlayer}
+    />
   );
 };
 
