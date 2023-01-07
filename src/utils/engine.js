@@ -1,3 +1,4 @@
+import Piece from "../classes/piece";
 import {
   Allegiance,
   DirectionOperator,
@@ -300,11 +301,6 @@ export const refreshBoardState = ({
   const currentPlayerPopulatedTiles = tiles.filter(
     (tile) => tile.piece?.allegiance === activePlayer
   );
-
-  //TODO: en passant, castling
-  //TODO: can we check 'check' before generating pseudo moves? more efficient?
-  //TODO: do we even need a separate pseudo move generator?
-  //TODO: handle removal of moves / don't generate when checked by 2 or more pieces
 
   for (const tile of currentPlayerPopulatedTiles) {
     generatePseudoLegalMoves(
@@ -760,4 +756,15 @@ const nextTile = (a, b, direction) => {
     default:
       return a;
   }
+};
+
+export const hasMovedToEndOfBoard = (piece, destinationTile) =>
+  (piece.allegiance === Allegiance.BLACK &&
+    destinationTile.row === boardDimensions.rows.length - 1) ||
+  (piece.allegiance === Allegiance.WHITE && destinationTile.row === 0);
+
+export const promotePiece = (boardState, { row, col }, newRank) => {
+  const sourceTile = boardState.findTileByCoords(row, col);
+
+  sourceTile.piece = new Piece(sourceTile.piece.allegiance, newRank);
 };

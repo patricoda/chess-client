@@ -8,9 +8,12 @@ import {
   refreshBoardState,
   isCheckmate,
   getCheckingPieces,
-  movePiece
+  movePiece,
+  hasMovedToEndOfBoard,
+  promotePiece
 } from "../utils/engine";
 import Pawn from "../classes/pawn";
+import PromotionSelect from "./promotionSelect";
 
 const defaultGameState = {
   activePlayer: Allegiance.WHITE,
@@ -59,8 +62,9 @@ const setPieces = (boardState) => {
 
 const gameReducer = (state, action) => {
   switch (action.type) {
-    case "SET_BOARD":
+    case "INITIATE_GAME":
       setPieces(state.boardState);
+      refreshBoardState(state);
 
       return state;
     case "MOVE_PIECE":
@@ -78,27 +82,37 @@ const gameReducer = (state, action) => {
         }
       });
 
-      return state;
-    case "SWAP_PLAYER_TURN":
-      state.activePlayer =
-        state.activePlayer === Allegiance.WHITE
-          ? Allegiance.BLACK
-          : Allegiance.WHITE;
-
-      return state;
-    case "EVALUATE_CHECK_STATE":
-      state.checkingPieces = getCheckingPieces(state);
-
-      return state;
-    case "GENERATE_MOVES":
-      refreshBoardState(state);
-
-      return state;
-    case "DETERMINE_CHECKMATE":
-      if (isCheckmate(state)) {
-        state.isCheckmate = true;
-        alert(`checkmate! ${state.activePlayer} loses!`);
+      //mark for promotion if applicable
+      if (
+        action.sourceTile.piece.type === PieceType.PAWN &&
+        hasMovedToEndOfBoard(action.sourceTile.piece, action.destinationTile)
+      ) {
+        state.promotableTile = action.destinationTile;
       }
+
+      return state;
+    case "PROMOTE_PIECE":
+      promotePiece(state.boardState, action.tile, action.newRank);
+      state.promotableTile = null;
+
+      return state;
+    case "PROGRESS_GAME":
+      if (!state.promotableTile) {
+        state.activePlayer =
+          state.activePlayer === Allegiance.WHITE
+            ? Allegiance.BLACK
+            : Allegiance.WHITE;
+
+        state.checkingPieces = getCheckingPieces(state);
+
+        refreshBoardState(state);
+
+        if (isCheckmate(state)) {
+          state.isCheckmate = true;
+          alert(`checkmate! ${state.activePlayer} loses!`);
+        }
+      }
+
       return state;
     default:
       return state;
@@ -117,38 +131,47 @@ const Game = () => {
       });
 
       dispatch({
-        type: "SWAP_PLAYER_TURN"
-      });
-
-      dispatch({
-        type: "EVALUATE_CHECK_STATE"
-      });
-
-      dispatch({
-        type: "GENERATE_MOVES"
-      });
-
-      dispatch({
-        type: "DETERMINE_CHECKMATE"
+        type: "PROGRESS_GAME"
       });
     },
     [dispatch]
   );
 
-  useEffect(() => {
-    dispatch({ type: "SET_BOARD" });
+  const onPromotionHandler = useCallback(
+    (e) => {
+      dispatch({
+        type: "PROMOTE_PIECE",
+        tile: gameState.promotableTile,
+        newRank: e.currentTarget.dataset.value
+      });
 
+      dispatch({
+        type: "PROGRESS_GAME"
+      });
+    },
+    [dispatch, gameState.promotableTile]
+  );
+
+  useEffect(() => {
     dispatch({
-      type: "GENERATE_MOVES"
+      type: "INITIATE_GAME"
     });
   }, [dispatch]);
 
   return (
-    <Chessboard
-      dropHandler={onDropHandler}
-      boardState={gameState.boardState}
-      activePlayer={gameState.activePlayer}
-    />
+    <>
+      {!!gameState.promotableTile && (
+        <PromotionSelect
+          allegiance={gameState.activePlayer}
+          promotionHandler={onPromotionHandler}
+        />
+      )}
+      <Chessboard
+        dropHandler={onDropHandler}
+        boardState={gameState.boardState}
+        activePlayer={gameState.activePlayer}
+      />
+    </>
   );
 };
 
