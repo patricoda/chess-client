@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 
 import { PieceType } from "../enums/enums";
-import { useDrag, useDrop } from "react-dnd";
 import { Pawn, Rook, Knight, Bishop, King, Queen } from "./piece";
 
 const renderPiece = ({ type, allegiance }) => {
@@ -27,52 +26,27 @@ const Piece = ({
   tile,
   allegiance,
   activePlayer,
-  dragHandler,
-  dragEndHandler,
+  selectTileHandler,
   children
-}) => {
-  const [, drag] = useDrag(
-    () => ({
-      type: "PIECE",
-      item: () => {
-        dragHandler(tile);
-        return tile;
-      },
-      end: dragEndHandler
-    }),
-    [tile]
-  );
-
-  return (
-    <div ref={(node) => (activePlayer === allegiance ? drag(node) : node)}>
-      {children}
-    </div>
-  );
-};
+}) => (
+  <div onClick={() => activePlayer === allegiance && selectTileHandler(tile)}>
+    {children}
+  </div>
+);
 
 const Tile = ({
   tile,
-  heldPiece,
-  dropHandler,
-  dragHandler,
-  dragEndHandler,
+  selectedTile,
+  moveHandler,
+  selectTileHandler,
   activePlayer
 }) => {
-  const isValidDropTile = heldPiece?.isValidMove(tile.row, tile.col);
-
-  const [, drop] = useDrop(
-    () => ({
-      accept: "PIECE",
-      canDrop: () => isValidDropTile,
-      drop: (item) => dropHandler(item, tile)
-    }),
-    [heldPiece]
-  );
+  const isValidMoveTile = selectedTile?.piece.isValidMove(tile.row, tile.col);
 
   return (
     <td
-      className={isValidDropTile ? "validDropTile" : ""}
-      ref={(node) => drop(node)}
+      className={isValidMoveTile ? "validMoveTile" : ""}
+      onClick={() => isValidMoveTile && moveHandler(tile)}
       id={`${tile.chessCoords}`}
     >
       {tile.piece && (
@@ -80,8 +54,7 @@ const Tile = ({
           tile={tile}
           allegiance={tile.piece.allegiance}
           activePlayer={activePlayer}
-          dragHandler={dragHandler}
-          dragEndHandler={dragEndHandler}
+          selectTileHandler={selectTileHandler}
         >
           {renderPiece(tile.piece)}
         </Piece>
@@ -100,16 +73,27 @@ const Row = ({ tiles, ...props }) => {
   );
 };
 
-const Board = ({ boardState, ...props }) => {
-  const [heldPiece, setHeldPiece] = useState(null);
+const Board = ({ boardState, moveHandler, ...props }) => {
+  const [selectedTile, setSelectedTile] = useState(null);
 
-  const onDragHandler = useCallback(({ piece }) => {
-    setHeldPiece(piece);
-  }, []);
+  const onSelectTileHandler = useCallback(
+    (tile) => {
+      if (selectedTile !== tile) {
+        setSelectedTile(tile);
+      } else {
+        setSelectedTile(null);
+      }
+    },
+    [selectedTile]
+  );
 
-  const onDragEndHandler = useCallback(() => {
-    setHeldPiece(null);
-  }, []);
+  const onMoveHandler = useCallback(
+    (tile) => {
+      moveHandler(selectedTile, tile);
+      setSelectedTile(null);
+    },
+    [moveHandler, selectedTile]
+  );
 
   return (
     <table className="chessboard">
@@ -118,9 +102,9 @@ const Board = ({ boardState, ...props }) => {
           <Row
             key={i}
             tiles={tiles}
-            heldPiece={heldPiece}
-            dragHandler={onDragHandler}
-            dragEndHandler={onDragEndHandler}
+            selectedTile={selectedTile}
+            selectTileHandler={onSelectTileHandler}
+            moveHandler={onMoveHandler}
             {...props}
           />
         ))}

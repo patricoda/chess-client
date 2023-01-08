@@ -6,7 +6,7 @@ import Piece from "../classes/piece";
 import { Allegiance, PieceType } from "../enums/enums";
 import {
   refreshBoardState,
-  isCheckmate,
+  getActivePlayerValidMoves,
   getCheckingPieces,
   movePiece,
   hasMovedToEndOfBoard,
@@ -107,9 +107,14 @@ const gameReducer = (state, action) => {
 
         refreshBoardState(state);
 
-        if (isCheckmate(state)) {
-          state.isCheckmate = true;
-          alert(`checkmate! ${state.activePlayer} loses!`);
+        if (!getActivePlayerValidMoves(state).length) {
+          if (state.checkingPieces.length) {
+            state.isCheckmate = true;
+            alert(`checkmate! ${state.activePlayer} loses!`);
+          } else {
+            state.stalemate = true;
+            alert(`stalemate!`);
+          }
         }
       }
 
@@ -122,7 +127,7 @@ const gameReducer = (state, action) => {
 const Game = () => {
   const [gameState, dispatch] = useImmerReducer(gameReducer, defaultGameState);
 
-  const onDropHandler = useCallback(
+  const onMoveHandler = useCallback(
     (sourceTile, dropTile) => {
       dispatch({
         type: "MOVE_PIECE",
@@ -167,7 +172,7 @@ const Game = () => {
         />
       )}
       <Chessboard
-        dropHandler={onDropHandler}
+        moveHandler={onMoveHandler}
         boardState={gameState.boardState}
         activePlayer={gameState.activePlayer}
       />

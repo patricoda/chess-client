@@ -277,17 +277,14 @@ const handleSingleCheck = (
   }
 };
 
-export const isCheckmate = ({ boardState, activePlayer, checkingPieces }) => {
-  if (checkingPieces.length) {
-    const flattenedTileArray = boardState.tiles.flat();
+export const getActivePlayerValidMoves = ({ boardState, activePlayer }) => {
+  const flattenedTileArray = boardState.tiles.flat();
 
-    const tilesWithValidMoves = flattenedTileArray.filter(
-      ({ piece }) =>
-        piece?.allegiance === activePlayer && piece.validMoves.length
-    );
+  const tilesWithValidMoves = flattenedTileArray.filter(
+    ({ piece }) => piece?.allegiance === activePlayer && piece.validMoves.length
+  );
 
-    return !!!tilesWithValidMoves.length;
-  }
+  return tilesWithValidMoves;
 };
 
 export const refreshBoardState = ({
