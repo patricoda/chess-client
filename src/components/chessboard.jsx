@@ -73,7 +73,7 @@ const Row = ({ tiles, ...props }) => {
   );
 };
 
-const Board = ({ boardState, moveHandler, ...props }) => {
+const Board = ({ board, moveHandler, ...props }) => {
   const [selectedTile, setSelectedTile] = useState(null);
 
   const onSelectTileHandler = useCallback(
@@ -98,7 +98,7 @@ const Board = ({ boardState, moveHandler, ...props }) => {
   return (
     <table className="chessboard">
       <tbody>
-        {boardState.tiles.map((tiles, i) => (
+        {board.tiles.map((tiles, i) => (
           <Row
             key={i}
             tiles={tiles}

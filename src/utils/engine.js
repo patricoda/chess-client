@@ -1,4 +1,5 @@
 import Piece from "../classes/piece";
+import Pawn from "../classes/pawn";
 import {
   Allegiance,
   DirectionOperator,
@@ -7,15 +8,51 @@ import {
 } from "../enums/enums";
 import { boardDimensions } from "./values";
 
-//TODO: put entire engine in hook with state for board? removes need to pass through and recalculate per reducer call
-//definitely efficiencies to make here i.e. store positions, etc
+export const setPieces = (board) => {
+  board.tiles[0][0].piece = new Piece(Allegiance.BLACK, PieceType.ROOK);
+  board.tiles[0][1].piece = new Piece(Allegiance.BLACK, PieceType.KNIGHT);
+  board.tiles[0][2].piece = new Piece(Allegiance.BLACK, PieceType.BISHOP);
+  board.tiles[0][3].piece = new Piece(Allegiance.BLACK, PieceType.QUEEN);
+  board.tiles[0][4].piece = new Piece(Allegiance.BLACK, PieceType.KING);
+  board.tiles[0][5].piece = new Piece(Allegiance.BLACK, PieceType.BISHOP);
+  board.tiles[0][6].piece = new Piece(Allegiance.BLACK, PieceType.KNIGHT);
+  board.tiles[0][7].piece = new Piece(Allegiance.BLACK, PieceType.ROOK);
+
+  board.tiles[1][0].piece = new Pawn(Allegiance.BLACK);
+  board.tiles[1][1].piece = new Pawn(Allegiance.BLACK);
+  board.tiles[1][2].piece = new Pawn(Allegiance.BLACK);
+  board.tiles[1][3].piece = new Pawn(Allegiance.BLACK);
+  board.tiles[1][4].piece = new Pawn(Allegiance.BLACK);
+  board.tiles[1][5].piece = new Pawn(Allegiance.BLACK);
+  board.tiles[1][6].piece = new Pawn(Allegiance.BLACK);
+  board.tiles[1][7].piece = new Pawn(Allegiance.BLACK);
+
+  board.tiles[6][0].piece = new Pawn(Allegiance.WHITE);
+  board.tiles[6][1].piece = new Pawn(Allegiance.WHITE);
+  board.tiles[6][2].piece = new Pawn(Allegiance.WHITE);
+  board.tiles[6][3].piece = new Pawn(Allegiance.WHITE);
+  board.tiles[6][4].piece = new Pawn(Allegiance.WHITE);
+  board.tiles[6][5].piece = new Pawn(Allegiance.WHITE);
+  board.tiles[6][6].piece = new Pawn(Allegiance.WHITE);
+  board.tiles[6][7].piece = new Pawn(Allegiance.WHITE);
+
+  board.tiles[7][0].piece = new Piece(Allegiance.WHITE, PieceType.ROOK);
+  board.tiles[7][1].piece = new Piece(Allegiance.WHITE, PieceType.KNIGHT);
+  board.tiles[7][2].piece = new Piece(Allegiance.WHITE, PieceType.BISHOP);
+  board.tiles[7][3].piece = new Piece(Allegiance.WHITE, PieceType.QUEEN);
+  board.tiles[7][4].piece = new Piece(Allegiance.WHITE, PieceType.KING);
+  board.tiles[7][5].piece = new Piece(Allegiance.WHITE, PieceType.BISHOP);
+  board.tiles[7][6].piece = new Piece(Allegiance.WHITE, PieceType.KNIGHT);
+  board.tiles[7][7].piece = new Piece(Allegiance.WHITE, PieceType.ROOK);
+};
+
 export const movePiece = (
-  boardState,
+  board,
   { row: sourceRow, col: sourceCol },
   { row: destRow, col: destCol }
 ) => {
-  const sourceTile = boardState.findTileByCoords(sourceRow, sourceCol);
-  const destinationTile = boardState.findTileByCoords(destRow, destCol);
+  const sourceTile = board.findTileByCoords(sourceRow, sourceCol);
+  const destinationTile = board.findTileByCoords(destRow, destCol);
 
   const sourcePiece = sourceTile.piece;
 
@@ -26,7 +63,7 @@ export const movePiece = (
     )?.enPassantPawnCoords;
 
     if (enPassantPawnCoords) {
-      const enPassantPawnTile = boardState.findTileByCoords(
+      const enPassantPawnTile = board.findTileByCoords(
         enPassantPawnCoords.row,
         enPassantPawnCoords.col
       );
@@ -42,12 +79,12 @@ export const movePiece = (
     ).castlingRookCoords;
 
     if (castlingRookCoords) {
-      const rookSourceTile = boardState.findTileByCoords(
+      const rookSourceTile = board.findTileByCoords(
         castlingRookCoords.source.row,
         castlingRookCoords.source.col
       );
 
-      const rookDestinationTile = boardState.findTileByCoords(
+      const rookDestinationTile = board.findTileByCoords(
         castlingRookCoords.destination.row,
         castlingRookCoords.destination.col
       );
@@ -63,9 +100,9 @@ export const movePiece = (
   sourceTile.piece = null;
 };
 
-export const getCheckingPieces = ({ boardState, activePlayer }) => {
-  const tiles = boardState.tiles;
-  const flatTileArray = boardState.tiles.flat();
+export const getCheckingPieces = ({ board, activePlayer }) => {
+  const tiles = board.tiles;
+  const flatTileArray = board.tiles.flat();
 
   //test moves from king tile for different types of movement type, and see if that piece is present
   //to determine
@@ -84,7 +121,7 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
     kingTile,
     direction
   ).pseudoMoves.reduce((acc, { row, col }) => {
-    const tile = boardState.findTileByCoords(row, col);
+    const tile = board.findTileByCoords(row, col);
     const { piece } = tile;
 
     return piece?.type === PieceType.PAWN && piece?.allegiance !== activePlayer
@@ -94,7 +131,7 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
 
   const knightCheckingTiles = getKnightMoves(tiles, kingTile).reduce(
     (acc, { row, col }) => {
-      const tile = boardState.findTileByCoords(row, col);
+      const tile = board.findTileByCoords(row, col);
       const { piece } = tile;
 
       return piece?.type === PieceType.KNIGHT &&
@@ -107,7 +144,7 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
 
   const lateralCheckingTiles = getLateralMoves(tiles, kingTile).reduce(
     (acc, { row, col }) => {
-      const tile = boardState.findTileByCoords(row, col);
+      const tile = board.findTileByCoords(row, col);
       const { piece } = tile;
 
       return (piece?.type === PieceType.ROOK ||
@@ -121,7 +158,7 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
 
   const diagonalCheckingTiles = getDiagonalMoves(tiles, kingTile).reduce(
     (acc, { row, col }) => {
-      const tile = boardState.findTileByCoords(row, col);
+      const tile = board.findTileByCoords(row, col);
       const { piece } = tile;
 
       return (piece?.type === PieceType.BISHOP ||
@@ -143,9 +180,9 @@ export const getCheckingPieces = ({ boardState, activePlayer }) => {
   return checkingTiles;
 };
 
-const evaluatePins = (boardState, kingTile) => {
-  const tiles = boardState.tiles;
-  const flatTileArray = boardState.tiles.flat();
+const evaluatePins = (board, kingTile) => {
+  const tiles = board.tiles;
+  const flatTileArray = board.tiles.flat();
 
   const lateralAttackingTiles = getLateralMoves(
     tiles,
@@ -153,7 +190,7 @@ const evaluatePins = (boardState, kingTile) => {
     boardDimensions.rows,
     true
   ).reduce((acc, { row, col }) => {
-    const tile = boardState.findTileByCoords(row, col);
+    const tile = board.findTileByCoords(row, col);
     const { piece } = tile;
 
     return (piece?.type === PieceType.ROOK ||
@@ -169,7 +206,7 @@ const evaluatePins = (boardState, kingTile) => {
     boardDimensions.rows,
     true
   ).reduce((acc, { row, col }) => {
-    const tile = boardState.findTileByCoords(row, col);
+    const tile = board.findTileByCoords(row, col);
     const { piece } = tile;
 
     return (piece?.type === PieceType.BISHOP ||
@@ -185,7 +222,7 @@ const evaluatePins = (boardState, kingTile) => {
   ]) {
     //TODO: consider getDirectLineBetweenTiles returning tiles not coords..?
     const inbetweenTileCoords = getDirectLineBetweenTiles(
-      boardState.tiles,
+      board.tiles,
       attackingTile,
       kingTile,
       true
@@ -234,7 +271,7 @@ const evaluatePins = (boardState, kingTile) => {
 };
 
 const handleSingleCheck = (
-  boardState,
+  board,
   currentPlayerPopulatedTiles,
   kingTile,
   checkingTile
@@ -247,7 +284,7 @@ const handleSingleCheck = (
   //get tiles on shared line between king and checking piece to evaluate blockers and escape moves
   if (isSlidingPiece) {
     tilesInCheck = getDirectLineBetweenTiles(
-      boardState.tiles,
+      board.tiles,
       checkingTile,
       kingTile
     );
@@ -277,8 +314,8 @@ const handleSingleCheck = (
   }
 };
 
-export const getActivePlayerValidMoves = ({ boardState, activePlayer }) => {
-  const flattenedTileArray = boardState.tiles.flat();
+export const getActivePlayerValidMoves = ({ board, activePlayer }) => {
+  const flattenedTileArray = board.tiles.flat();
 
   const tilesWithValidMoves = flattenedTileArray.filter(
     ({ piece }) => piece?.allegiance === activePlayer && piece.validMoves.length
@@ -288,23 +325,19 @@ export const getActivePlayerValidMoves = ({ boardState, activePlayer }) => {
 };
 
 export const refreshBoardState = ({
-  boardState,
+  board,
   activePlayer,
   checkingPieces,
   moveHistory
 }) => {
-  const tiles = boardState.tiles.flat();
+  const tiles = board.tiles.flat();
 
   const currentPlayerPopulatedTiles = tiles.filter(
     (tile) => tile.piece?.allegiance === activePlayer
   );
 
   for (const tile of currentPlayerPopulatedTiles) {
-    generatePseudoLegalMoves(
-      boardState,
-      tile,
-      moveHistory[moveHistory.length - 1]
-    );
+    generatePseudoLegalMoves(board, tile, moveHistory[moveHistory.length - 1]);
     tile.piece.isPinned = false;
   }
 
@@ -314,14 +347,14 @@ export const refreshBoardState = ({
 
   //if there are two checking pieces, only king moves are valid
   if (checkingPieces.length !== 2) {
-    evaluatePins(boardState, kingTile);
+    evaluatePins(board, kingTile);
   }
 
   //TODO: does it make sense to have 'inCheck' passed through? just do it here and remove step?
   //if there is only one checking piece, filter moves so that pieces can only block check
   if (checkingPieces.length === 1) {
     handleSingleCheck(
-      boardState,
+      board,
       currentPlayerPopulatedTiles,
       kingTile,
       checkingPieces[0]
@@ -329,13 +362,13 @@ export const refreshBoardState = ({
   }
 
   //filter king moves based on attacking tiles, etc
-  evaluateLegalKngMoves(boardState, kingTile);
+  evaluateLegalKngMoves(board, kingTile);
 };
 
-export const evaluateLegalKngMoves = (boardState, kingTile) => {
+export const evaluateLegalKngMoves = (board, kingTile) => {
   //for each move, move the king temporarily, and see if it would be in check
   kingTile.piece.validMoves = kingTile.piece.validMoves.filter((move) => {
-    const destinationTile = boardState.findTileByCoords(move.row, move.col);
+    const destinationTile = board.findTileByCoords(move.row, move.col);
     const kingPiece = kingTile.piece;
     const piece = destinationTile.piece;
 
@@ -343,7 +376,7 @@ export const evaluateLegalKngMoves = (boardState, kingTile) => {
     kingTile.piece = null;
 
     const tileIsAttacked = !!getCheckingPieces({
-      boardState,
+      board,
       activePlayer: kingPiece.allegiance
     }).length;
 
@@ -760,8 +793,8 @@ export const hasMovedToEndOfBoard = (piece, destinationTile) =>
     destinationTile.row === boardDimensions.rows.length - 1) ||
   (piece.allegiance === Allegiance.WHITE && destinationTile.row === 0);
 
-export const promotePiece = (boardState, { row, col }, newRank) => {
-  const sourceTile = boardState.findTileByCoords(row, col);
+export const promotePiece = (board, { row, col }, newRank) => {
+  const sourceTile = board.findTileByCoords(row, col);
 
   sourceTile.piece = new Piece(sourceTile.piece.allegiance, newRank);
 };

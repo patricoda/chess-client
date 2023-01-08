@@ -2,7 +2,7 @@ import { immerable } from "immer";
 import Tile from "./tile";
 import { boardDimensions } from "../../utils/values";
 
-export default class BoardState {
+export default class Board {
   [immerable] = true;
   tiles = [];
 
