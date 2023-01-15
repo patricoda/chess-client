@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
-
-import { PieceType } from "../enums/enums";
+import { PieceType, Allegiance } from "../enums/enums";
 import { Pawn, Rook, Knight, Bishop, King, Queen } from "./piece";
 
 const renderPiece = ({ type, allegiance }) => {
@@ -27,20 +26,20 @@ const Piece = ({
   allegiance,
   activePlayer,
   selectTileHandler,
+  flipBoardOnPlayerChange,
   children
 }) => (
-  <div onClick={() => activePlayer === allegiance && selectTileHandler(tile)}>
+  <div
+    onClick={() => activePlayer === allegiance && selectTileHandler(tile)}
+    className={
+      flipBoardOnPlayerChange && activePlayer === Allegiance.BLACK ? "flip" : ""
+    }
+  >
     {children}
   </div>
 );
 
-const Tile = ({
-  tile,
-  selectedTile,
-  moveHandler,
-  selectTileHandler,
-  activePlayer
-}) => {
+const Tile = ({ tile, selectedTile, moveHandler, ...props }) => {
   const isValidMoveTile = selectedTile?.piece.isValidMove(tile.row, tile.col);
 
   return (
@@ -50,12 +49,7 @@ const Tile = ({
       id={`${tile.chessCoords}`}
     >
       {tile.piece && (
-        <Piece
-          tile={tile}
-          allegiance={tile.piece.allegiance}
-          activePlayer={activePlayer}
-          selectTileHandler={selectTileHandler}
-        >
+        <Piece tile={tile} allegiance={tile.piece.allegiance} {...props}>
           {renderPiece(tile.piece)}
         </Piece>
       )}
@@ -73,7 +67,13 @@ const Row = ({ tiles, ...props }) => {
   );
 };
 
-const Board = ({ board, moveHandler, ...props }) => {
+const Board = ({
+  board,
+  moveHandler,
+  activePlayer,
+  flipBoardOnPlayerChange,
+  ...props
+}) => {
   const [selectedTile, setSelectedTile] = useState(null);
 
   const onSelectTileHandler = useCallback(
@@ -96,7 +96,13 @@ const Board = ({ board, moveHandler, ...props }) => {
   );
 
   return (
-    <table className="chessboard">
+    <table
+      className={`chessboard ${
+        flipBoardOnPlayerChange && activePlayer === Allegiance.BLACK
+          ? "flip"
+          : ""
+      }`}
+    >
       <tbody>
         {board.tiles.map((tiles, i) => (
           <Row
@@ -105,6 +111,8 @@ const Board = ({ board, moveHandler, ...props }) => {
             selectedTile={selectedTile}
             selectTileHandler={onSelectTileHandler}
             moveHandler={onMoveHandler}
+            activePlayer={activePlayer}
+            flipBoardOnPlayerChange={flipBoardOnPlayerChange}
             {...props}
           />
         ))}
