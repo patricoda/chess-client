@@ -790,7 +790,7 @@ const nextTile = (a, b, direction) => {
 
 export const hasMovedToEndOfBoard = (piece, destinationTile) =>
   (piece.allegiance === Allegiance.BLACK &&
-    destinationTile.row === boardDimensions.rows.length - 1) ||
+    destinationTile.row === boardDimensions.rows - 1) ||
   (piece.allegiance === Allegiance.WHITE && destinationTile.row === 0);
 
 export const promotePiece = (board, { row, col }, newRank) => {
