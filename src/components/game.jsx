@@ -1,7 +1,7 @@
 import { memo } from "react";
 import Chessboard from "./chessboard";
 import PromotionSelect from "./promotionSelect";
-import useChessEngine from "../hooks/useChessEngine";
+import useChessEngine from "../hooks/chessEngine/useChessEngine";
 
 const flipBoardOnPlayerChange = false;
 

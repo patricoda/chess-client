@@ -1,16 +1,16 @@
 import { useEffect, useCallback } from "react";
 import { useImmerReducer } from "use-immer";
-import Board from "../classes/board/board";
-import { Allegiance, PieceType } from "../enums/enums";
+import Board from "../../classes/board/board";
+import { Allegiance, PieceType } from "../../enums/enums";
 import {
   setPieces,
-  refreshBoardState,
+  generateLegalMoves,
   getActivePlayerValidMoves,
   getCheckingPieces,
   movePiece,
   hasMovedToEndOfBoard,
   promotePiece
-} from "../utils/engine";
+} from "./engine";
 
 const defaultGameState = {
   activePlayer: Allegiance.WHITE,
@@ -26,7 +26,7 @@ const gameReducer = (state, action) => {
   switch (action.type) {
     case "INITIATE_GAME":
       setPieces(state.board);
-      refreshBoardState(state);
+      generateLegalMoves(state);
 
       return state;
     case "MOVE_PIECE":
@@ -67,7 +67,7 @@ const gameReducer = (state, action) => {
 
         state.checkingPieces = getCheckingPieces(state);
 
-        refreshBoardState(state);
+        generateLegalMoves(state);
 
         if (!getActivePlayerValidMoves(state).length) {
           if (state.checkingPieces.length) {

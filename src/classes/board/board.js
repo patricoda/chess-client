@@ -11,12 +11,9 @@ export default class Board {
   }
 
   generateTiles() {
-    for (let r = 0; r < boardDimensions.rows; r++) {
-      this.tiles.push([]);
-      for (let c = 0; c < boardDimensions.columns; c++) {
-        this.tiles[r].push(new Tile(r, c));
-      }
-    }
+    this.tiles = [...Array(boardDimensions.rows)].map((row, r) =>
+      [...Array(boardDimensions.columns)].map((col, c) => new Tile(r, c))
+    );
   }
 
   findTileByCoords(row, col) {

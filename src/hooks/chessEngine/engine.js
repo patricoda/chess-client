@@ -1,12 +1,12 @@
-import Piece from "../classes/piece";
-import Pawn from "../classes/pawn";
+import Piece from "../../classes/piece";
+import Pawn from "../../classes/pawn";
 import {
   Allegiance,
   DirectionOperator,
   PieceType,
   SlidingPieceType
-} from "../enums/enums";
-import { boardDimensions } from "./values";
+} from "../../enums/enums";
+import { boardDimensions } from "../../utils/values";
 
 export const setPieces = (board) => {
   board.tiles[0][0].piece = new Piece(Allegiance.BLACK, PieceType.ROOK);
@@ -324,7 +324,7 @@ export const getActivePlayerValidMoves = ({ board, activePlayer }) => {
   return tilesWithValidMoves;
 };
 
-export const refreshBoardState = ({
+export const generateLegalMoves = ({
   board,
   activePlayer,
   checkingPieces,
