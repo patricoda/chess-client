@@ -1,6 +1,6 @@
 export const Allegiance = Object.freeze({
   BLACK: "BLACK",
-  WHITE: "WHITE"
+  WHITE: "WHITE",
 });
 
 export const PieceType = Object.freeze({
@@ -9,16 +9,16 @@ export const PieceType = Object.freeze({
   QUEEN: "QUEEN",
   ROOK: "ROOK",
   BISHOP: "BISHOP",
-  KNIGHT: "KNIGHT"
+  KNIGHT: "KNIGHT",
 });
 
 export const SlidingPieceType = Object.freeze({
   QUEEN: "QUEEN",
   ROOK: "ROOK",
-  BISHOP: "BISHOP"
+  BISHOP: "BISHOP",
 });
 
 export const DirectionOperator = Object.freeze({
   PLUS: "PLUS",
-  MINUS: "MINUS"
+  MINUS: "MINUS",
 });
