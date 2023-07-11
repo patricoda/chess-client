@@ -9,7 +9,7 @@ import {
   getCheckingPieces,
   movePiece,
   hasMovedToEndOfBoard,
-  promotePiece
+  promotePiece,
 } from "./engine";
 
 const defaultGameState = {
@@ -19,7 +19,7 @@ const defaultGameState = {
   moveHistory: [],
   promotableTile: null,
   isStalemate: false,
-  isCheckmate: false
+  isCheckmate: false,
 };
 
 const gameReducer = (state, action) => {
@@ -30,20 +30,14 @@ const gameReducer = (state, action) => {
 
       return state;
     case "MOVE_PIECE":
-      movePiece(state.board, action.sourceTile, action.destinationTile);
+      movePiece(state.board, source, destination);
 
       state.moveHistory.push({
-        source: {
-          row: action.sourceTile.row,
-          col: action.sourceTile.col,
-          piece: action.sourceTile.piece
-        },
-        destination: {
-          row: action.destinationTile.row,
-          col: action.destinationTile.col
-        }
+        source,
+        destination,
       });
 
+      //TODO amend how we get source / dest tiles
       //mark for promotion if applicable
       if (
         action.sourceTile.piece.type === PieceType.PAWN &&
@@ -90,15 +84,15 @@ export const useChessEngine = () => {
   const [gameState, dispatch] = useImmerReducer(gameReducer, defaultGameState);
 
   const movePiece = useCallback(
-    (sourceTile, dropTile) => {
+    (source, destination) => {
       dispatch({
         type: "MOVE_PIECE",
-        sourceTile,
-        destinationTile: dropTile
+        source,
+        destination,
       });
 
       dispatch({
-        type: "PROGRESS_GAME"
+        type: "PROGRESS_GAME",
       });
     },
     [dispatch]
@@ -109,11 +103,11 @@ export const useChessEngine = () => {
       dispatch({
         type: "PROMOTE_PIECE",
         tile: gameState.promotableTile,
-        newRank: e.currentTarget.dataset.value
+        newRank: e.currentTarget.dataset.value,
       });
 
       dispatch({
-        type: "PROGRESS_GAME"
+        type: "PROGRESS_GAME",
       });
     },
     [dispatch, gameState.promotableTile]
@@ -121,7 +115,7 @@ export const useChessEngine = () => {
 
   useEffect(() => {
     dispatch({
-      type: "INITIATE_GAME"
+      type: "INITIATE_GAME",
     });
   }, [dispatch]);
 
@@ -135,7 +129,7 @@ export const useChessEngine = () => {
     isStalemate,
     isCheckmate,
     movePiece,
-    promotePiece
+    promotePiece,
   };
 };
 

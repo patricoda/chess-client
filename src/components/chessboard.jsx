@@ -27,7 +27,7 @@ const Piece = ({
   activePlayer,
   selectTileHandler,
   flipBoardOnPlayerChange,
-  children
+  children,
 }) => (
   <div
     onClick={() => activePlayer === allegiance && selectTileHandler(tile)}
@@ -89,7 +89,7 @@ const Board = ({
 
   const onMoveHandler = useCallback(
     (tile) => {
-      moveHandler(selectedTile, tile);
+      moveHandler(selectedTile.chessCoords, tile.chessCoords);
       setSelectedTile(null);
     },
     [moveHandler, selectedTile]
