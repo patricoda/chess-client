@@ -1,15 +1,15 @@
 import { useEffect, useCallback } from "react";
 import { useImmerReducer } from "use-immer";
 import Board from "../../classes/board/board";
-import { Allegiance, PieceType } from "../../enums/enums";
+import { Allegiance } from "../../enums/enums";
 import {
   setPieces,
   generateLegalMoves,
   getActivePlayerValidMoves,
   getCheckingPieces,
   movePiece,
-  hasMovedToEndOfBoard,
   promotePiece,
+  isPromotable,
 } from "./engine";
 
 const defaultGameState = {
@@ -17,7 +17,7 @@ const defaultGameState = {
   board: new Board(),
   checkingPieces: [],
   moveHistory: [],
-  promotableTile: null,
+  promotableCoords: null,
   isStalemate: false,
   isCheckmate: false,
 };
@@ -30,30 +30,30 @@ const gameReducer = (state, action) => {
 
       return state;
     case "MOVE_PIECE":
-      movePiece(state.board, source, destination);
+      //TODO mostRecentMove needs to be refactored
+      state.promotableCoords = isPromotable(
+        state.board,
+        action.source,
+        action.destination
+      )
+        ? action.destination
+        : null;
+
+      movePiece(state.board, action.source, action.destination);
 
       state.moveHistory.push({
-        source,
-        destination,
+        source: action.source,
+        destination: action.destination,
       });
-
-      //TODO amend how we get source / dest tiles
-      //mark for promotion if applicable
-      if (
-        action.sourceTile.piece.type === PieceType.PAWN &&
-        hasMovedToEndOfBoard(action.sourceTile.piece, action.destinationTile)
-      ) {
-        state.promotableTile = action.destinationTile;
-      }
 
       return state;
     case "PROMOTE_PIECE":
-      promotePiece(state.board, action.tile, action.newRank);
-      state.promotableTile = null;
+      promotePiece(state.board, action.coords, action.newRank);
+      state.promotableCoords = null;
 
       return state;
     case "PROGRESS_GAME":
-      if (!state.promotableTile) {
+      if (!state.promotableCoords) {
         state.activePlayer =
           state.activePlayer === Allegiance.WHITE
             ? Allegiance.BLACK
@@ -102,7 +102,7 @@ export const useChessEngine = () => {
     (e) => {
       dispatch({
         type: "PROMOTE_PIECE",
-        tile: gameState.promotableTile,
+        coords: gameState.promotableCoords,
         newRank: e.currentTarget.dataset.value,
       });
 
@@ -110,7 +110,7 @@ export const useChessEngine = () => {
         type: "PROGRESS_GAME",
       });
     },
-    [dispatch, gameState.promotableTile]
+    [dispatch, gameState.promotableCoords]
   );
 
   useEffect(() => {
@@ -119,13 +119,13 @@ export const useChessEngine = () => {
     });
   }, [dispatch]);
 
-  const { board, activePlayer, promotableTile, isStalemate, isCheckmate } =
+  const { board, activePlayer, promotableCoords, isStalemate, isCheckmate } =
     gameState;
 
   return {
     board,
     activePlayer,
-    promotableTile,
+    promotableCoords,
     isStalemate,
     isCheckmate,
     movePiece,

@@ -1,6 +1,6 @@
 import { immerable } from "immer";
 import Tile from "./tile";
-import { boardDimensions } from "../../utils/values";
+import { COLUMN_VALUES, ROW_VALUES, boardDimensions } from "../../utils/values";
 
 export default class Board {
   [immerable] = true;
@@ -16,7 +16,16 @@ export default class Board {
     );
   }
 
-  findTileByCoords(row, col) {
+  getTile(row, col) {
     return this.tiles[row][col];
+  }
+
+  getTileByCoords(coords) {
+    const [col, row] = coords.split("");
+
+    return this.getTile(
+      ROW_VALUES.length - 1 - ROW_VALUES.indexOf(row),
+      COLUMN_VALUES.indexOf(col)
+    );
   }
 }
