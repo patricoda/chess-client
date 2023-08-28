@@ -83,7 +83,7 @@ const gameReducer = (state, action) => {
 export const useChessEngine = () => {
   const [gameState, dispatch] = useImmerReducer(gameReducer, defaultGameState);
 
-  const movePiece = useCallback(
+  const handleMovePiece = useCallback(
     (source, destination) => {
       dispatch({
         type: "MOVE_PIECE",
@@ -98,7 +98,7 @@ export const useChessEngine = () => {
     [dispatch]
   );
 
-  const promotePiece = useCallback(
+  const handlePromotePiece = useCallback(
     (e) => {
       dispatch({
         type: "PROMOTE_PIECE",
@@ -128,8 +128,8 @@ export const useChessEngine = () => {
     promotableCoords,
     isStalemate,
     isCheckmate,
-    movePiece,
-    promotePiece,
+    handleMovePiece,
+    handlePromotePiece,
   };
 };
 

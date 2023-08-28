@@ -7,19 +7,24 @@ const flipBoardOnPlayerChange = false;
 
 const Game = () => {
   //TODO: move promotable tile to board, perhaps import PGN string in for board setup
-  const { board, activePlayer, promotableCoords, movePiece, promotePiece } =
-    useChessEngine();
+  const {
+    board,
+    activePlayer,
+    promotableCoords,
+    handleMovePiece,
+    handlePromotePiece,
+  } = useChessEngine();
 
   return (
     <>
       {!!promotableCoords && (
         <PromotionSelect
           allegiance={activePlayer}
-          promotionHandler={promotePiece}
+          promotionHandler={handlePromotePiece}
         />
       )}
       <Chessboard
-        moveHandler={movePiece}
+        moveHandler={handleMovePiece}
         board={board}
         activePlayer={activePlayer}
         flipBoardOnPlayerChange={flipBoardOnPlayerChange}
