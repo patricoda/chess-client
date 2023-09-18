@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import useSocketIO from "./useSocketIo";
 
-//TODO: perhaps split between chat room and game data
 export const useChessServerGameState = () => {
   const { socket, isOnline, handlePostEvent } = useSocketIO();
   const [gameState, setGameState] = useState([]);
@@ -15,9 +15,11 @@ export const useChessServerGameState = () => {
       console.log("received game state update");
       setGameState(gameState);
     });
-  }, [socket]);
 
-  return { isOnline, messageHistory, handlePostMove };
+    handlePostEvent("AWAITING_GAME");
+  }, [socket, handlePostEvent]);
+
+  return { isOnline, gameState, handlePostMove };
 };
 
 export default useChessServerGameState;

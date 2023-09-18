@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import useSocketIO from "./useSocketIo";
 
-//TODO: perhaps split between chat room and game data
 export const useChessServerChat = () => {
   const { socket, isOnline, handlePostEvent } = useSocketIO();
   const [messageHistory, setMessageHistory] = useState([]);

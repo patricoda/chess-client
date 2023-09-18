@@ -1,11 +1,11 @@
 import { memo } from "react";
 import Chessboard from "./chessboard";
-import PromotionSelect from "./promotionSelect";
+import PromotionSelector from "./promotionSelector";
 import useChessEngine from "../hooks/chessEngine/useChessEngine";
 
 const flipBoardOnPlayerChange = false;
 
-const Game = () => {
+const OfflineGame = () => {
   //TODO: move promotable tile to board, perhaps import PGN string in for board setup
   const {
     board,
@@ -18,7 +18,7 @@ const Game = () => {
   return (
     <>
       {!!promotableCoords && (
-        <PromotionSelect
+        <PromotionSelector
           allegiance={activePlayer}
           promotionHandler={handlePromotePiece}
         />
@@ -33,4 +33,4 @@ const Game = () => {
   );
 };
 
-export default memo(Game);
+export default memo(OfflineGame);

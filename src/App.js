@@ -1,20 +1,26 @@
 import "./App.css";
-import ChatRoom from "./components/chatRoom";
-import Game from "./components/game";
-import useChessServerChat from "./hooks/server/useChessServerChat";
+import GameTypeSelector from "./components/gameTypeSelector";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Suspense, lazy } from "react";
+
+const OfflineGame = lazy(() => import("./components/offlineGame"));
+const OnlineGame = lazy(() => import("./components/onlineGame"));
 
 function App() {
-  const { socket, isOnline, messageHistory, handlePostMessage } =
-    useChessServerChat();
-
   return (
     <div className="App">
-      <div>{`${isOnline}`}</div>
-      <Game />
-      <ChatRoom
-        messageHistory={messageHistory}
-        handleMessageSubmit={handlePostMessage}
-      />
+      {
+        //TODO: loading component
+      }
+      <Suspense fallback={<p>Loading...</p>}>
+        <BrowserRouter basename="/">
+          <Routes>
+            <Route index element={<GameTypeSelector />} />
+            <Route path="offline" element={<OfflineGame />} />
+            <Route path="online" element={<OnlineGame />} />
+          </Routes>
+        </BrowserRouter>
+      </Suspense>
     </div>
   );
 }
