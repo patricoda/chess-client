@@ -98,14 +98,14 @@ export const movePiece = (board, source, destination) => {
   sourceTile.piece = null;
 };
 
-export const getCheckingPieces = ({ board, activePlayer }) => {
+export const getCheckingPieces = ({ board, playerTurn }) => {
   const flatTileArray = board.tiles.flat();
 
   //test moves from king tile for different types of movement type, and see if that piece is present
   //to determine
   const kingTile = flatTileArray.find(
     ({ piece }) =>
-      piece?.type === PieceType.KING && piece?.allegiance === activePlayer
+      piece?.type === PieceType.KING && piece?.allegiance === playerTurn
   );
 
   const direction =
@@ -121,7 +121,7 @@ export const getCheckingPieces = ({ board, activePlayer }) => {
     const tile = board.getTile(row, col);
     const { piece } = tile;
 
-    return piece?.type === PieceType.PAWN && piece?.allegiance !== activePlayer
+    return piece?.type === PieceType.PAWN && piece?.allegiance !== playerTurn
       ? [...acc, tile]
       : acc;
   }, []);
@@ -132,7 +132,7 @@ export const getCheckingPieces = ({ board, activePlayer }) => {
       const { piece } = tile;
 
       return piece?.type === PieceType.KNIGHT &&
-        piece?.allegiance !== activePlayer
+        piece?.allegiance !== playerTurn
         ? [...acc, tile]
         : acc;
     },
@@ -146,7 +146,7 @@ export const getCheckingPieces = ({ board, activePlayer }) => {
 
       return (piece?.type === PieceType.ROOK ||
         piece?.type === PieceType.QUEEN) &&
-        piece?.allegiance !== activePlayer
+        piece?.allegiance !== playerTurn
         ? [...acc, tile]
         : acc;
     },
@@ -160,7 +160,7 @@ export const getCheckingPieces = ({ board, activePlayer }) => {
 
       return (piece?.type === PieceType.BISHOP ||
         piece?.type === PieceType.QUEEN) &&
-        piece?.allegiance !== activePlayer
+        piece?.allegiance !== playerTurn
         ? [...acc, tile]
         : acc;
     },
@@ -306,11 +306,11 @@ const handleSingleCheck = (
   }
 };
 
-export const getActivePlayerValidMoves = ({ board, activePlayer }) => {
+export const getActivePlayerValidMoves = ({ board, playerTurn }) => {
   const flattenedTileArray = board.tiles.flat();
 
   const tilesWithValidMoves = flattenedTileArray.filter(
-    ({ piece }) => piece?.allegiance === activePlayer && piece.validMoves.length
+    ({ piece }) => piece?.allegiance === playerTurn && piece.validMoves.length
   );
 
   return tilesWithValidMoves;
@@ -318,14 +318,14 @@ export const getActivePlayerValidMoves = ({ board, activePlayer }) => {
 
 export const generateLegalMoves = ({
   board,
-  activePlayer,
+  playerTurn,
   checkingPieces,
   moveHistory,
 }) => {
   const tiles = board.tiles.flat();
 
   const currentPlayerPopulatedTiles = tiles.filter(
-    (tile) => tile.piece?.allegiance === activePlayer
+    (tile) => tile.piece?.allegiance === playerTurn
   );
 
   for (const tile of currentPlayerPopulatedTiles) {
@@ -368,7 +368,7 @@ export const evaluateLegalKngMoves = (board, kingTile) => {
 
     const tileIsAttacked = !!getCheckingPieces({
       board,
-      activePlayer: kingPiece.allegiance,
+      playerTurn: kingPiece.allegiance,
     }).length;
 
     destinationTile.piece = piece;

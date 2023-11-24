@@ -13,7 +13,7 @@ import {
 } from "./engine";
 
 const defaultGameState = {
-  activePlayer: Allegiance.WHITE,
+  playerTurn: Allegiance.WHITE,
   board: new Board(),
   checkingPieces: [],
   moveHistory: [],
@@ -54,8 +54,8 @@ const gameReducer = (state, action) => {
       return state;
     case "PROGRESS_GAME":
       if (!state.promotableCoords) {
-        state.activePlayer =
-          state.activePlayer === Allegiance.WHITE
+        state.playerTurn =
+          state.playerTurn === Allegiance.WHITE
             ? Allegiance.BLACK
             : Allegiance.WHITE;
 
@@ -66,7 +66,7 @@ const gameReducer = (state, action) => {
         if (!getActivePlayerValidMoves(state).length) {
           if (state.checkingPieces.length) {
             state.isCheckmate = true;
-            alert(`checkmate! ${state.activePlayer} loses!`);
+            alert(`checkmate! ${state.playerTurn} loses!`);
           } else {
             state.isStalemate = true;
             alert(`stalemate!`);
@@ -119,12 +119,12 @@ export const useChessEngine = () => {
     });
   }, [dispatch]);
 
-  const { board, activePlayer, promotableCoords, isStalemate, isCheckmate } =
+  const { board, playerTurn, promotableCoords, isStalemate, isCheckmate } =
     gameState;
 
   return {
     board,
-    activePlayer,
+    playerTurn,
     promotableCoords,
     isStalemate,
     isCheckmate,

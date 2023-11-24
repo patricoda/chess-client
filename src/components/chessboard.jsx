@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { PieceType, Allegiance } from "../enums/enums";
 import { Pawn, Rook, Knight, Bishop, King, Queen } from "./piece";
+import PromotionSelector from "./promotionSelector";
 
 const renderPiece = ({ type, allegiance }) => {
   switch (type) {
@@ -24,15 +25,15 @@ const renderPiece = ({ type, allegiance }) => {
 const Piece = ({
   tile,
   allegiance,
-  activePlayer,
+  playerTurn,
   selectTileHandler,
   flipBoardOnPlayerChange,
   children,
 }) => (
   <div
-    onClick={() => activePlayer === allegiance && selectTileHandler(tile)}
+    onClick={() => playerTurn === allegiance && selectTileHandler(tile)}
     className={
-      flipBoardOnPlayerChange && activePlayer === Allegiance.BLACK ? "flip" : ""
+      flipBoardOnPlayerChange && playerTurn === Allegiance.BLACK ? "flip" : ""
     }
   >
     {children}
@@ -67,11 +68,13 @@ const Row = ({ tiles, ...props }) => {
   );
 };
 
-const Board = ({
+const ChessBoard = ({
   board,
   moveHandler,
-  activePlayer,
+  playerTurn,
   flipBoardOnPlayerChange,
+  promotableCoords,
+  onPromotionHandler,
   ...props
 }) => {
   const [selectedTile, setSelectedTile] = useState(null);
@@ -96,29 +99,37 @@ const Board = ({
   );
 
   return (
-    <table
-      className={`chessboard ${
-        flipBoardOnPlayerChange && activePlayer === Allegiance.BLACK
-          ? "flip"
-          : ""
-      }`}
-    >
-      <tbody>
-        {board.tiles.map((tiles, i) => (
-          <Row
-            key={i}
-            tiles={tiles}
-            selectedTile={selectedTile}
-            selectTileHandler={onSelectTileHandler}
-            moveHandler={onMoveHandler}
-            activePlayer={activePlayer}
-            flipBoardOnPlayerChange={flipBoardOnPlayerChange}
-            {...props}
-          />
-        ))}
-      </tbody>
-    </table>
+    <>
+      {!!promotableCoords && (
+        <PromotionSelector
+          allegiance={playerTurn}
+          promotionHandler={onPromotionHandler}
+        />
+      )}
+      <table
+        className={`chessboard ${
+          flipBoardOnPlayerChange && playerTurn === Allegiance.BLACK
+            ? "flip"
+            : ""
+        }`}
+      >
+        <tbody>
+          {board.tiles.map((tiles, i) => (
+            <Row
+              key={i}
+              tiles={tiles}
+              selectedTile={selectedTile}
+              selectTileHandler={onSelectTileHandler}
+              moveHandler={onMoveHandler}
+              playerTurn={playerTurn}
+              flipBoardOnPlayerChange={flipBoardOnPlayerChange}
+              {...props}
+            />
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 };
 
-export default Board;
+export default ChessBoard;

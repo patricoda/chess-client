@@ -9,9 +9,6 @@ const OnlineGame = lazy(() => import("./components/onlineGame"));
 function App() {
   return (
     <div className="App">
-      {
-        //TODO: loading component
-      }
       <Suspense fallback={<p>Loading...</p>}>
         <BrowserRouter basename="/">
           <Routes>
