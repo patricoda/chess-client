@@ -25,23 +25,29 @@ const renderPiece = ({ type, allegiance }) => {
 const Piece = ({
   tile,
   allegiance,
-  playerTurn,
+  playerAllegiance,
   selectTileHandler,
-  flipBoardOnPlayerChange,
   children,
 }) => (
   <div
-    onClick={() => playerTurn === allegiance && selectTileHandler(tile)}
-    className={
-      flipBoardOnPlayerChange && playerTurn === Allegiance.BLACK ? "flip" : ""
-    }
+    onClick={() => playerAllegiance === allegiance && selectTileHandler(tile)}
+    className={playerAllegiance === Allegiance.BLACK ? "flip" : ""}
   >
     {children}
   </div>
 );
 
-const Tile = ({ tile, selectedTile, moveHandler, ...props }) => {
-  const isValidMoveTile = selectedTile?.piece.isValidMove(tile.row, tile.col);
+const Tile = ({
+  tile,
+  selectedTile,
+  clientPlayer: { allegiance: playerAllegiance, legalMoves },
+  moveHandler,
+  ...props
+}) => {
+  const isValidMoveTile =
+    legalMoves[selectedTile?.chessCoords]?.some(
+      (coords) => coords === tile.chessCoords
+    ) ?? false; //selectedTile?.piece.isValidMove(tile.row, tile.col);
 
   return (
     <td
@@ -50,7 +56,12 @@ const Tile = ({ tile, selectedTile, moveHandler, ...props }) => {
       id={`${tile.chessCoords}`}
     >
       {tile.piece && (
-        <Piece tile={tile} allegiance={tile.piece.allegiance} {...props}>
+        <Piece
+          tile={tile}
+          allegiance={tile.piece.allegiance}
+          playerAllegiance={playerAllegiance}
+          {...props}
+        >
           {renderPiece(tile.piece)}
         </Piece>
       )}
@@ -69,14 +80,14 @@ const Row = ({ tiles, ...props }) => {
 };
 
 const ChessBoard = ({
-  board,
+  boardState,
   moveHandler,
-  playerTurn,
-  flipBoardOnPlayerChange,
+  clientPlayer,
   promotableCoords,
   onPromotionHandler,
   ...props
 }) => {
+  const { allegiance } = clientPlayer;
   const [selectedTile, setSelectedTile] = useState(null);
 
   const onSelectTileHandler = useCallback(
@@ -102,27 +113,24 @@ const ChessBoard = ({
     <>
       {!!promotableCoords && (
         <PromotionSelector
-          allegiance={playerTurn}
+          allegiance={allegiance}
           promotionHandler={onPromotionHandler}
         />
       )}
       <table
         className={`chessboard ${
-          flipBoardOnPlayerChange && playerTurn === Allegiance.BLACK
-            ? "flip"
-            : ""
+          allegiance === Allegiance.BLACK ? "flip" : ""
         }`}
       >
         <tbody>
-          {board.tiles.map((tiles, i) => (
+          {boardState.tiles.map((tiles, i) => (
             <Row
               key={i}
               tiles={tiles}
               selectedTile={selectedTile}
               selectTileHandler={onSelectTileHandler}
               moveHandler={onMoveHandler}
-              playerTurn={playerTurn}
-              flipBoardOnPlayerChange={flipBoardOnPlayerChange}
+              clientPlayer={clientPlayer}
               {...props}
             />
           ))}

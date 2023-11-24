@@ -6,8 +6,12 @@ export const useChessServerGameState = () => {
   const [gameState, setGameState] = useState({});
 
   const handlePostMove = useCallback(
-    (move) => handlePostEvent("POST_MOVE", move),
-    [handlePostEvent]
+    (from, to) =>
+      handlePostEvent("POST_MOVE", {
+        gameId: gameState.gameId,
+        move: { from, to },
+      }),
+    [handlePostEvent, gameState.gameId]
   );
 
   useEffect(() => {
@@ -16,6 +20,7 @@ export const useChessServerGameState = () => {
       setGameState({
         ...gameState,
         boardState: JSON.parse(gameState.boardState),
+        clientPlayer: gameState.players.find(({ id }) => id === socket.id),
       });
     });
 
@@ -24,6 +29,7 @@ export const useChessServerGameState = () => {
       setGameState({
         ...gameState,
         boardState: JSON.parse(gameState.boardState),
+        clientPlayer: gameState.players.find(({ id }) => id === socket.id),
       });
     });
 

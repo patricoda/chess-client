@@ -4,18 +4,18 @@ import ChatRoom from "./chatRoom";
 import ChessBoard from "./chessboard";
 
 const OnlineGame = () => {
-  const { isOnline, gameState, handlePostMove } = useChessServerGameState();
+  const { isOnline, gameState, handleMovePiece } = useChessServerGameState();
   const { messageHistory, handlePostMessage } = useChessServerChat();
 
   //TODO: promotion handler and coords
   return (
     <div className="App">
       <div>{`${isOnline}`}</div>
-      {gameState.boardState && (
+      {!!gameState.boardState && (
         <ChessBoard
-          moveHandler={handlePostMove}
-          board={gameState.boardState}
-          playerTurn={gameState.playerTurn}
+          moveHandler={handleMovePiece}
+          boardState={gameState.boardState}
+          clientPlayer={gameState.clientPlayer}
         />
       )}
       <ChatRoom
