@@ -14,18 +14,19 @@ export const useChessServerGameState = () => {
     [handlePostEvent, gameState.gameId]
   );
 
-  useEffect(() => {
-    socket.on("GAME_INITIALISED", (gameState) => {
-      console.log("received game started event");
-      setGameState({
-        ...gameState,
-        boardState: JSON.parse(gameState.boardState),
-        clientPlayer: gameState.players.find(({ id }) => id === socket.id),
-      });
-    });
+  const handlePostPromotionSelection = useCallback(
+    (e) =>
+      handlePostEvent("POST_PROMOTION_OPTION", {
+        gameId: gameState.gameId,
+        newRank: e.currentTarget.dataset.value,
+      }),
+    [handlePostEvent, gameState.gameId]
+  );
 
+  useEffect(() => {
     socket.on("GAME_STATE_UPDATED", (gameState) => {
       console.log("received game state update");
+      console.log(gameState);
       setGameState({
         ...gameState,
         boardState: JSON.parse(gameState.boardState),
@@ -36,7 +37,12 @@ export const useChessServerGameState = () => {
     handlePostEvent("AWAITING_GAME");
   }, [socket, handlePostEvent]);
 
-  return { isOnline, gameState, handleMovePiece: handlePostMove };
+  return {
+    isOnline,
+    gameState,
+    handleMovePiece: handlePostMove,
+    handlePromotePiece: handlePostPromotionSelection,
+  };
 };
 
 export default useChessServerGameState;

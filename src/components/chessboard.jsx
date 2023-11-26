@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { PieceType, Allegiance } from "../enums/enums";
 import { Pawn, Rook, Knight, Bishop, King, Queen } from "./piece";
-import PromotionSelector from "./promotionSelector";
 
 const renderPiece = ({ type, allegiance }) => {
   switch (type) {
@@ -24,13 +23,18 @@ const renderPiece = ({ type, allegiance }) => {
 
 const Piece = ({
   tile,
-  allegiance,
+  pieceAllegiance,
   playerAllegiance,
   selectTileHandler,
+  isPlayerTurn,
   children,
 }) => (
   <div
-    onClick={() => playerAllegiance === allegiance && selectTileHandler(tile)}
+    onClick={() =>
+      playerAllegiance === pieceAllegiance &&
+      isPlayerTurn &&
+      selectTileHandler(tile)
+    }
     className={playerAllegiance === Allegiance.BLACK ? "flip" : ""}
   >
     {children}
@@ -40,26 +44,27 @@ const Piece = ({
 const Tile = ({
   tile,
   selectedTile,
-  clientPlayer: { allegiance: playerAllegiance, legalMoves },
+  clientPlayer: { allegiance: playerAllegiance, legalMoves, isPlayerTurn },
   moveHandler,
   ...props
 }) => {
   const isValidMoveTile =
-    legalMoves[selectedTile?.chessCoords]?.some(
-      (coords) => coords === tile.chessCoords
+    legalMoves[selectedTile?.notation]?.some(
+      (coords) => coords === tile.notation
     ) ?? false; //selectedTile?.piece.isValidMove(tile.row, tile.col);
 
   return (
     <td
       className={isValidMoveTile ? "validMoveTile" : ""}
       onClick={() => isValidMoveTile && moveHandler(tile)}
-      id={`${tile.chessCoords}`}
+      id={`${tile.notation}`}
     >
       {tile.piece && (
         <Piece
           tile={tile}
-          allegiance={tile.piece.allegiance}
+          pieceAllegiance={tile.piece.allegiance}
           playerAllegiance={playerAllegiance}
+          isPlayerTurn={isPlayerTurn}
           {...props}
         >
           {renderPiece(tile.piece)}
@@ -73,20 +78,13 @@ const Row = ({ tiles, ...props }) => {
   return (
     <tr>
       {tiles.map((tile) => (
-        <Tile key={tile.chessCoords} tile={tile} {...props} />
+        <Tile key={tile.notation} tile={tile} {...props} />
       ))}
     </tr>
   );
 };
 
-const ChessBoard = ({
-  boardState,
-  moveHandler,
-  clientPlayer,
-  promotableCoords,
-  onPromotionHandler,
-  ...props
-}) => {
+const ChessBoard = ({ boardState, moveHandler, clientPlayer, ...props }) => {
   const { allegiance } = clientPlayer;
   const [selectedTile, setSelectedTile] = useState(null);
 
@@ -103,40 +101,30 @@ const ChessBoard = ({
 
   const onMoveHandler = useCallback(
     (tile) => {
-      moveHandler(selectedTile.chessCoords, tile.chessCoords);
+      moveHandler(selectedTile.notation, tile.notation);
       setSelectedTile(null);
     },
     [moveHandler, selectedTile]
   );
 
   return (
-    <>
-      {!!promotableCoords && (
-        <PromotionSelector
-          allegiance={allegiance}
-          promotionHandler={onPromotionHandler}
-        />
-      )}
-      <table
-        className={`chessboard ${
-          allegiance === Allegiance.BLACK ? "flip" : ""
-        }`}
-      >
-        <tbody>
-          {boardState.tiles.map((tiles, i) => (
-            <Row
-              key={i}
-              tiles={tiles}
-              selectedTile={selectedTile}
-              selectTileHandler={onSelectTileHandler}
-              moveHandler={onMoveHandler}
-              clientPlayer={clientPlayer}
-              {...props}
-            />
-          ))}
-        </tbody>
-      </table>
-    </>
+    <table
+      className={`chessboard ${allegiance === Allegiance.BLACK ? "flip" : ""}`}
+    >
+      <tbody>
+        {boardState.tiles.map((tiles, i) => (
+          <Row
+            key={i}
+            tiles={tiles}
+            selectedTile={selectedTile}
+            selectTileHandler={onSelectTileHandler}
+            moveHandler={onMoveHandler}
+            clientPlayer={clientPlayer}
+            {...props}
+          />
+        ))}
+      </tbody>
+    </table>
   );
 };
 
