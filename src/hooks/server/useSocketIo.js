@@ -3,8 +3,8 @@ import { SocketContext } from "../../context/socket";
 
 export const useSocketIO = () => {
   const [isOnline, setIsOnline] = useState(false);
+  const [connectedUser, setConnectedUser] = useState({});
 
-  const [user, setUser] = useState(null);
   const socket = useContext(SocketContext);
 
   const handlePostEvent = useCallback(
@@ -15,11 +15,21 @@ export const useSocketIO = () => {
   );
 
   useEffect(() => {
-    setIsOnline(socket.connected);
-    //TODO needs to be ID not socket ID when implemented.
-    //TODO add user context / store to store ID and name
-    setUser({ id: socket.id });
-    socket.on("connect", (e) => {
+    //check for active session
+    const sessionId = localStorage.getItem("sessionId");
+    socket.auth = { sessionId };
+    socket.connect();
+
+    socket.on("SESSION_INITIALISED", (sessionData) => {
+      //store session ID for reconnection
+      localStorage.setItem("sessionId", sessionData.sessionId);
+      setConnectedUser({
+        username: sessionData.username,
+        userId: sessionData.userId,
+      });
+    });
+
+    socket.on("connect", () => {
       console.log("connected");
       setIsOnline(true);
     });
@@ -27,7 +37,7 @@ export const useSocketIO = () => {
     socket.on("disconnect", () => setIsOnline(false));
   }, [socket]);
 
-  return { socket, isOnline, handlePostEvent };
+  return { socket, connectedUser, isOnline, handlePostEvent };
 };
 
 export default useSocketIO;

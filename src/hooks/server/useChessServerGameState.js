@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import useSocketIO from "./useSocketIo";
 
 export const useChessServerGameState = () => {
-  const { socket, isOnline, handlePostEvent } = useSocketIO();
+  const { socket, connectedUser, isOnline, handlePostEvent } = useSocketIO();
   const [gameState, setGameState] = useState({});
 
   const handlePostMove = useCallback(
@@ -30,12 +30,14 @@ export const useChessServerGameState = () => {
       setGameState({
         ...gameState,
         boardState: JSON.parse(gameState.boardState),
-        clientPlayer: gameState.players.find(({ id }) => id === socket.id),
+        clientPlayer: gameState.players.find(
+          ({ id }) => id === connectedUser.userId
+        ),
       });
     });
 
     handlePostEvent("AWAITING_GAME");
-  }, [socket, handlePostEvent]);
+  }, [socket, connectedUser, handlePostEvent]);
 
   return {
     isOnline,
