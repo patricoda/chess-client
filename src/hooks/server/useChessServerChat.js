@@ -1,23 +1,25 @@
-import { useCallback, useEffect, useState } from "react";
-import useSocketIO from "./useSocketIo";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { SocketContext } from "../../context/socket";
 
 export const useChessServerChat = () => {
-  const { socket, isOnline, handlePostEvent } = useSocketIO();
   const [messageHistory, setMessageHistory] = useState([]);
+
+  const { setEventListener, handlePostEvent } = useContext(SocketContext);
 
   const handlePostMessage = useCallback(
     (message) => handlePostEvent("POST_MESSAGE", message),
     [handlePostEvent]
   );
 
-  useEffect(() => {
-    socket.on("MESSAGE_RECEIVED", (message) => {
-      console.log("received message - ", message);
-      setMessageHistory((prevMessages) => [...prevMessages, message]);
-    });
-  }, [socket]);
+  useEffect(
+    () =>
+      setEventListener("MESSAGE_RECEIVED", (message) =>
+        setMessageHistory((prevMessages) => [...prevMessages, message])
+      ),
+    [setEventListener]
+  );
 
-  return { isOnline, messageHistory, handlePostMessage };
+  return { messageHistory, handlePostMessage };
 };
 
 export default useChessServerChat;
