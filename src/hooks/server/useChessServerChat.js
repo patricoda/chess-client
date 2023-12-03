@@ -7,7 +7,7 @@ export const useChessServerChat = () => {
   const { setEventListener, handlePostEvent } = useContext(SocketContext);
 
   const handlePostMessage = useCallback(
-    (message) => handlePostEvent("POST_MESSAGE", message),
+    (roomId, message) => handlePostEvent("POST_MESSAGE", { roomId, message }),
     [handlePostEvent]
   );
 

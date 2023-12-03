@@ -7,6 +7,8 @@ export const context = {
   handlePostEvent: undefined,
   setConnectedUser: undefined,
   connect: undefined,
+  networkError: undefined,
+  usernameRequired: false,
 };
 
 export const SocketContext = createContext(context);

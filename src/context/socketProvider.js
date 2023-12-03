@@ -2,7 +2,6 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SocketContext from "./socket";
 import { io } from "socket.io-client";
 
-const connect = () => {};
 export const SocketContextProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [connectedUser, setConnectedUser] = useState({
@@ -11,6 +10,7 @@ export const SocketContextProvider = ({ children }) => {
   });
   //record whether or not a new username is required if no session was found on connecting
   const [usernameRequired, setUsernameRequired] = useState(false);
+  const [networkError, setNetworkError] = useState(null);
 
   const socket = useRef(io("localhost:3001", { autoConnect: false }));
 
@@ -23,7 +23,7 @@ export const SocketContextProvider = ({ children }) => {
   }, []);
 
   const handleConnect = useCallback((username) => {
-    //attach sessionId if stored
+    //attach sessionId and username if applicable
     socket.current.auth = {
       sessionId: localStorage.getItem("sessionId"),
       username,
@@ -45,12 +45,18 @@ export const SocketContextProvider = ({ children }) => {
       console.log("connected");
       setIsConnected(true);
       setUsernameRequired(false);
+      setNetworkError(null);
     });
+
     socket.current.on("disconnect", () => setIsConnected(false));
 
     socket.current.on("connect_error", (err) => {
       console.log(err.message);
-      setUsernameRequired(true);
+      if (err.message === "Invalid username") {
+        setUsernameRequired(true);
+      } else {
+        setNetworkError(err.message);
+      }
     });
 
     //TODO: if dev only
@@ -67,6 +73,7 @@ export const SocketContextProvider = ({ children }) => {
   const context = useMemo(
     () => ({
       isConnected,
+      networkError,
       usernameRequired,
       connectedUser,
       setConnectedUser,
@@ -76,6 +83,7 @@ export const SocketContextProvider = ({ children }) => {
     }),
     [
       isConnected,
+      networkError,
       usernameRequired,
       connectedUser,
       setConnectedUser,

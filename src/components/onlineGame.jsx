@@ -1,70 +1,78 @@
-import { useContext, useEffect, useRef } from "react";
+import { useCallback, useContext } from "react";
 import useChessServerChat from "../hooks/server/useChessServerChat";
 import useChessServerGameState from "../hooks/server/useChessServerGameState";
 import ChatRoom from "./chatRoom";
-import ChessBoard from "./chessboard";
-import PromotionSelector from "./promotionSelector";
 import SocketContext from "../context/socket";
+import NewUserDialog from "./dialog/newUserDialog";
+import { ErrorDialog } from "./dialog/errorDialog";
+import { Game } from "./game";
+import { Dialog } from "./dialog/dialog";
 
 const OnlineGame = () => {
   const { gameState, handleMovePiece, handlePromotePiece } =
     useChessServerGameState();
   const { messageHistory, handlePostMessage } = useChessServerChat();
-  const dialogRef = useRef(null);
 
-  const { isConnected, usernameRequired, handleConnect } =
+  const { isConnected, networkError, usernameRequired, handleConnect } =
     useContext(SocketContext);
 
-  const handleNameSubmission = (e) => {
-    e.preventDefault();
-    //set name and attempt reconnect
-    handleConnect({ username: e.currentTarget.name.value });
-  };
+  const handleSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      //set name and attempt reconnect
+      handleConnect(e.currentTarget.name.value);
+    },
+    [handleConnect]
+  );
 
-  useEffect(() => {
-    if (usernameRequired) {
-      dialogRef.current.showModal();
-    } else {
-      dialogRef.current.close();
-    }
-  }, [usernameRequired]);
+  const handleSubmitMessage = useCallback(
+    (message) => {
+      handlePostMessage(gameState.id, message);
+    },
+    [handlePostMessage, gameState.id]
+  );
 
   return (
-    <div>
-      <dialog ref={dialogRef}>
-        <form onSubmit={handleNameSubmission}>
-          <input
-            id="name"
-            type="text"
-            placeholder="Please enter your name"
-            name="name"
+    <div className="wrapper">
+      <ErrorDialog
+        isVisible={networkError && networkError !== "Invalid username"}
+      >
+        <p>{networkError}</p>
+      </ErrorDialog>
+      {usernameRequired ? (
+        <NewUserDialog handleSubmit={handleSubmit} isVisible={true} />
+      ) : gameState.isAwaitingGame ? (
+        <Dialog isVisible={true}>
+          <p>Please wait...</p>
+        </Dialog>
+      ) : (
+        <>
+          <Dialog isVisible={gameState.isStalemate}>
+            <p>Stalemate!</p>
+          </Dialog>
+          <Dialog isVisible={gameState.isCheckmate}>
+            <p>
+              {gameState.winningPlayer?.id === gameState.clientPlayer?.id
+                ? "You win!"
+                : "You lose!"}
+            </p>
+          </Dialog>
+          <Game
+            gameState={gameState}
+            handleMovePiece={handleMovePiece}
+            handlePromotePiece={handlePromotePiece}
           />
-          <button>submit</button>
-        </form>
-      </dialog>
-      {gameState.clientPlayer?.isPlayerTurn &&
-        gameState.isAwaitingPromotionSelection && (
-          <PromotionSelector
-            allegiance={gameState.clientPlayer.allegiance}
-            promotionHandler={handlePromotePiece}
+          <ChatRoom
+            messageHistory={messageHistory}
+            handleMessageSubmit={handleSubmitMessage}
           />
-        )}
-      {!!gameState.boardState && (
-        <ChessBoard
-          moveHandler={handleMovePiece}
-          boardState={gameState.boardState}
-          clientPlayer={gameState.clientPlayer}
-        />
+          <div>
+            <p>{`online = ${isConnected}`}</p>
+            <p>{`is checkmate = ${gameState.isCheckmate}`}</p>
+            <p>{`is stalemate = ${gameState.isStalemate}`}</p>
+          </div>
+        </>
       )}
-      <ChatRoom
-        messageHistory={messageHistory}
-        handleMessageSubmit={handlePostMessage}
-      />
-      <div>
-        <p>{`online = ${isConnected}`}</p>
-        <p>{`is checkmate = ${gameState.isCheckmate}`}</p>
-        <p>{`is stalemate = ${gameState.isStalemate}`}</p>
-      </div>
     </div>
   );
 };
