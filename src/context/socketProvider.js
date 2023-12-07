@@ -22,12 +22,17 @@ export const SocketContextProvider = ({ children }) => {
     socket.current.on(event, callback);
   }, []);
 
+  const removeEventListener = useCallback((event, callback) => {
+    socket.current.off(event, callback);
+  }, []);
+
   const handleConnect = useCallback((username) => {
     //attach sessionId and username if applicable
     socket.current.auth = {
       sessionId: localStorage.getItem("sessionId"),
       username,
     };
+
     socket.current.connect();
   }, []);
 
@@ -59,8 +64,6 @@ export const SocketContextProvider = ({ children }) => {
       }
     });
 
-    //TODO: if dev only
-    //TODO: unregister events?
     socket.current.onAny((event, ...args) => {
       console.log(event, args);
     });
@@ -78,6 +81,7 @@ export const SocketContextProvider = ({ children }) => {
       connectedUser,
       setConnectedUser,
       setEventListener,
+      removeEventListener,
       handlePostEvent,
       handleConnect,
     }),
@@ -88,6 +92,7 @@ export const SocketContextProvider = ({ children }) => {
       connectedUser,
       setConnectedUser,
       setEventListener,
+      removeEventListener,
       handlePostEvent,
       handleConnect,
     ]

@@ -4,8 +4,12 @@ import { SocketContext } from "../../context/socket";
 export const useChessServerGameState = () => {
   const [gameState, setGameState] = useState({ isAwaitingGame: true });
 
-  const { connectedUser, setEventListener, handlePostEvent } =
-    useContext(SocketContext);
+  const {
+    connectedUser,
+    setEventListener,
+    removeEventListener,
+    handlePostEvent,
+  } = useContext(SocketContext);
 
   const handlePostMove = useCallback(
     (from, to) =>
@@ -49,7 +53,13 @@ export const useChessServerGameState = () => {
     );
 
     handlePostEvent("AWAITING_GAME");
-  }, [connectedUser, setEventListener, handlePostEvent]);
+
+    return () => {
+      //clean up events connected to socket instance as they persist outside of this hook
+      removeEventListener("GAME_STARTED");
+      removeEventListener("GAME_STATE_UPDATED");
+    };
+  }, [connectedUser, setEventListener, removeEventListener, handlePostEvent]);
 
   return {
     gameState,

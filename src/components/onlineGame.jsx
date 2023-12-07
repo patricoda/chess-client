@@ -7,8 +7,10 @@ import NewUserDialog from "./dialog/newUserDialog";
 import { ErrorDialog } from "./dialog/errorDialog";
 import { Game } from "./game";
 import { Dialog } from "./dialog/dialog";
+import { useNavigate } from "react-router-dom";
 
 const OnlineGame = () => {
+  const navigate = useNavigate();
   const { gameState, handleMovePiece, handlePromotePiece } =
     useChessServerGameState();
   const { messageHistory, handlePostMessage } = useChessServerChat();
@@ -31,6 +33,11 @@ const OnlineGame = () => {
     },
     [handlePostMessage, gameState.id]
   );
+
+  const handleLeaveGame = useCallback(() => {
+    //TODO
+    navigate("/");
+  }, [navigate]);
 
   return (
     <div className="wrapper">
@@ -66,6 +73,7 @@ const OnlineGame = () => {
             messageHistory={messageHistory}
             handleMessageSubmit={handleSubmitMessage}
           />
+          <input type="button" onClick={handleLeaveGame} value="leave" />
           <div>
             <p>{`online = ${isConnected}`}</p>
             <p>{`is checkmate = ${gameState.isCheckmate}`}</p>
