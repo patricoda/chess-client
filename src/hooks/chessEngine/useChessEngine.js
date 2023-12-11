@@ -48,7 +48,7 @@ const gameReducer = (state, action) => {
 
       return state;
     case "PROMOTE_PIECE":
-      promotePiece(state.board, action.coords, action.newRank);
+      promotePiece(state.board, action.coords, action.newType);
       state.promotableCoords = null;
 
       return state;
@@ -103,7 +103,7 @@ export const useChessEngine = () => {
       dispatch({
         type: "PROMOTE_PIECE",
         coords: gameState.promotableCoords,
-        newRank: e.currentTarget.dataset.value,
+        newType: e.currentTarget.dataset.value,
       });
 
       dispatch({

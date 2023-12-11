@@ -35,7 +35,7 @@ const OnlineGame = () => {
   );
 
   const handleLeaveGame = useCallback(() => {
-    //TODO
+    //TODO: disconnect
     navigate("/");
   }, [navigate]);
 
@@ -54,12 +54,13 @@ const OnlineGame = () => {
         </Dialog>
       ) : (
         <>
-          <Dialog isVisible={gameState.isStalemate}>
+          <Dialog isVisible={gameState.status === "STALEMATE"}>
             <p>Stalemate!</p>
           </Dialog>
-          <Dialog isVisible={gameState.isCheckmate}>
+          <Dialog isVisible={gameState.status === "CHECKMATE"}>
             <p>
-              {gameState.winningPlayer?.id === gameState.clientPlayer?.id
+              {gameState.winningPlayer?.userId ===
+              gameState.clientPlayer?.userId
                 ? "You win!"
                 : "You lose!"}
             </p>
@@ -76,8 +77,14 @@ const OnlineGame = () => {
           <input type="button" onClick={handleLeaveGame} value="leave" />
           <div>
             <p>{`online = ${isConnected}`}</p>
-            <p>{`is checkmate = ${gameState.isCheckmate}`}</p>
-            <p>{`is stalemate = ${gameState.isStalemate}`}</p>
+            <p>{`white online = ${
+              gameState.players?.find((player) => player.allegiance === "WHITE")
+                .isConnected
+            }`}</p>
+            <p>{`black online = ${
+              gameState.players?.find((player) => player.allegiance === "BLACK")
+                .isConnected
+            }`}</p>
           </div>
         </>
       )}

@@ -26,13 +26,13 @@ const Piece = ({
   pieceAllegiance,
   playerAllegiance,
   selectTileHandler,
-  isPlayerTurn,
+  isPlayersTurn,
   children,
 }) => (
   <div
     onClick={() =>
       playerAllegiance === pieceAllegiance &&
-      isPlayerTurn &&
+      isPlayersTurn &&
       selectTileHandler(tile)
     }
     className={playerAllegiance === Allegiance.BLACK ? "flip" : ""}
@@ -44,14 +44,15 @@ const Piece = ({
 const Tile = ({
   tile,
   selectedTile,
-  clientPlayer: { allegiance: playerAllegiance, legalMoves, isPlayerTurn },
+  clientPlayer: { allegiance: playerAllegiance },
   moveHandler,
+  legalMoves,
   ...props
 }) => {
   const isValidMoveTile =
     legalMoves[selectedTile?.notation]?.some(
       (coords) => coords === tile.notation
-    ) ?? false; //selectedTile?.piece.isValidMove(tile.row, tile.col);
+    ) ?? false;
 
   return (
     <td
@@ -64,7 +65,6 @@ const Tile = ({
           tile={tile}
           pieceAllegiance={tile.piece.allegiance}
           playerAllegiance={playerAllegiance}
-          isPlayerTurn={isPlayerTurn}
           {...props}
         >
           {renderPiece(tile.piece)}
