@@ -108,10 +108,6 @@ export const useChessServerGameState = () => {
       dispatch({ type: "USER_DISCONNECTED", userId });
     });
 
-    console.log("setting up event handlers");
-
-    handlePostEvent("AWAITING_GAME");
-
     return () => {
       //clean up events connected to socket instance as they persist outside of this hook
       removeEventListener("GAME_INITIALISED");
@@ -120,6 +116,12 @@ export const useChessServerGameState = () => {
       removeEventListener("USER_DISCONNECTED");
     };
   }, [setEventListener, removeEventListener, handlePostEvent, dispatch]);
+
+  useEffect(() => {
+    if (connectedUser.userId) {
+      handlePostEvent("AWAITING_GAME");
+    }
+  }, [handlePostEvent, connectedUser]);
 
   return {
     gameState,
