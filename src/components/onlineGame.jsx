@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 const OnlineGame = () => {
   const navigate = useNavigate();
-  const { gameState, handleMovePiece, handlePromotePiece } =
+  const { gameState, handleMovePiece, handlePromotePiece, handleForfeit } =
     useChessServerGameState();
   const { messageHistory, handlePostMessage } = useChessServerChat();
 
@@ -57,7 +57,9 @@ const OnlineGame = () => {
           <Dialog isVisible={gameState.status === "STALEMATE"}>
             <p>Stalemate!</p>
           </Dialog>
-          <Dialog isVisible={gameState.status === "CHECKMATE"}>
+          <Dialog
+            isVisible={["CHECKMATE", "FORFEIT"].includes(gameState.status)}
+          >
             <p>
               {gameState.winningPlayer?.userId ===
               gameState.clientPlayer?.userId
@@ -75,6 +77,7 @@ const OnlineGame = () => {
             handleMessageSubmit={handleSubmitMessage}
           />
           <input type="button" onClick={handleLeaveGame} value="leave" />
+          <input type="button" onClick={handleForfeit} value="forfeit" />
           <div>
             <p>{`online = ${isConnected}`}</p>
             <p>{`white online = ${

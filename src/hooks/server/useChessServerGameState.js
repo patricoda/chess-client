@@ -88,6 +88,11 @@ export const useChessServerGameState = () => {
     [handlePostEvent]
   );
 
+  const handleForfeit = useCallback(
+    () => handlePostEvent("FORFEIT"),
+    [handlePostEvent]
+  );
+
   useEffect(() => {
     setEventListener("GAME_INITIALISED", ({ userDetails, gameState }) => {
       dispatch({
@@ -127,6 +132,7 @@ export const useChessServerGameState = () => {
     gameState,
     handleMovePiece: handlePostMove,
     handlePromotePiece: handlePostPromotionSelection,
+    handleForfeit,
   };
 };
 
