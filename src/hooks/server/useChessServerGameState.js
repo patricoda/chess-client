@@ -13,6 +13,9 @@ export const useChessServerGameState = () => {
   const [gameState, dispatch] = useImmerReducer(
     (gameState, action) => {
       switch (action.type) {
+        case "IS_AWAITING_GAME": {
+          return { isAwaitingGame: true };
+        }
         case "GAME_INITIALISED":
           const newGameDetails = action.gameDetails;
           const newGameState = newGameDetails.gameState;
@@ -93,6 +96,16 @@ export const useChessServerGameState = () => {
     [handlePostEvent]
   );
 
+  const handleLeaveGame = useCallback(
+    () => handlePostEvent("LEAVE_GAME"),
+    [handlePostEvent]
+  );
+
+  const handleFindNewGame = useCallback(() => {
+    dispatch({ type: "IS_AWAITING_GAME" });
+    handlePostEvent("AWAITING_GAME");
+  }, [dispatch, handlePostEvent]);
+
   useEffect(() => {
     setEventListener("GAME_INITIALISED", ({ userDetails, gameState }) => {
       dispatch({
@@ -122,6 +135,7 @@ export const useChessServerGameState = () => {
     };
   }, [setEventListener, removeEventListener, handlePostEvent, dispatch]);
 
+  //TODO do we want to do this automatically?
   useEffect(() => {
     if (connectedUser.userId) {
       handlePostEvent("AWAITING_GAME");
@@ -133,6 +147,8 @@ export const useChessServerGameState = () => {
     handleMovePiece: handlePostMove,
     handlePromotePiece: handlePostPromotionSelection,
     handleForfeit,
+    handleLeaveGame,
+    handleFindNewGame,
   };
 };
 

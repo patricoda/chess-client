@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import useChessServerChat from "../hooks/server/useChessServerChat";
 import useChessServerGameState from "../hooks/server/useChessServerGameState";
 import ChatRoom from "./chatRoom";
@@ -8,11 +8,18 @@ import { ErrorDialog } from "./dialog/errorDialog";
 import { Game } from "./game";
 import { Dialog } from "./dialog/dialog";
 import { useNavigate } from "react-router-dom";
+import GameResultDialog from "./dialog/gameResultDialog";
 
 const OnlineGame = () => {
   const navigate = useNavigate();
-  const { gameState, handleMovePiece, handlePromotePiece, handleForfeit } =
-    useChessServerGameState();
+  const {
+    gameState,
+    handleMovePiece,
+    handlePromotePiece,
+    handleForfeit,
+    handleLeaveGame,
+    handleFindNewGame,
+  } = useChessServerGameState();
   const { messageHistory, handlePostMessage } = useChessServerChat();
 
   const { isConnected, networkError, usernameRequired, handleConnect } =
@@ -34,10 +41,20 @@ const OnlineGame = () => {
     [handlePostMessage, gameState.id]
   );
 
-  const handleLeaveGame = useCallback(() => {
-    //TODO: disconnect
+  const handleLeave = useCallback(() => {
+    handleLeaveGame();
     navigate("/");
-  }, [navigate]);
+  }, [handleLeaveGame, navigate]);
+
+  const handleLeaveAndFindNewGame = useCallback(() => {
+    handleLeaveGame();
+    handleFindNewGame();
+  }, [handleLeaveGame, handleFindNewGame]);
+
+  const hasGameEnded = useMemo(
+    () => ["CHECKMATE", "STALEMATE", "FORFEIT"].includes(gameState.status),
+    [gameState.status]
+  );
 
   return (
     <div className="wrapper">
@@ -54,19 +71,7 @@ const OnlineGame = () => {
         </Dialog>
       ) : (
         <>
-          <Dialog isVisible={gameState.status === "STALEMATE"}>
-            <p>Stalemate!</p>
-          </Dialog>
-          <Dialog
-            isVisible={["CHECKMATE", "FORFEIT"].includes(gameState.status)}
-          >
-            <p>
-              {gameState.winningPlayer?.userId ===
-              gameState.clientPlayer?.userId
-                ? "You win!"
-                : "You lose!"}
-            </p>
-          </Dialog>
+          {hasGameEnded && <GameResultDialog gameState={gameState} />}
           <Game
             gameState={gameState}
             handleMovePiece={handleMovePiece}
@@ -76,17 +81,27 @@ const OnlineGame = () => {
             messageHistory={messageHistory}
             handleMessageSubmit={handleSubmitMessage}
           />
-          <input type="button" onClick={handleLeaveGame} value="leave" />
-          <input type="button" onClick={handleForfeit} value="forfeit" />
+          {hasGameEnded ? (
+            <>
+              <input
+                type="button"
+                onClick={handleLeaveAndFindNewGame}
+                value="find new game"
+              />
+              <input type="button" onClick={handleLeave} value="leave" />
+            </>
+          ) : (
+            <input type="button" onClick={handleForfeit} value="forfeit" />
+          )}
           <div>
             <p>{`online = ${isConnected}`}</p>
             <p>{`white online = ${
               gameState.players?.find((player) => player.allegiance === "WHITE")
-                .isConnected
+                ?.isConnected
             }`}</p>
             <p>{`black online = ${
               gameState.players?.find((player) => player.allegiance === "BLACK")
-                .isConnected
+                ?.isConnected
             }`}</p>
           </div>
         </>
