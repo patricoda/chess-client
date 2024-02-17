@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import useChessServerChat from "../hooks/server/useChessServerChat";
 import useChessServerGameState from "../hooks/server/useChessServerGameState";
 import ChatRoom from "./chatRoom";
@@ -9,6 +9,13 @@ import { Game } from "./game";
 import { Dialog } from "./dialog/dialog";
 import { useNavigate } from "react-router-dom";
 import GameResultDialog from "./dialog/gameResultDialog";
+import { SocketContextProvider } from "../context/socketProvider";
+
+const OnlineGameWithContext = () => (
+  <SocketContextProvider>
+    <OnlineGame />
+  </SocketContextProvider>
+);
 
 const OnlineGame = () => {
   const navigate = useNavigate();
@@ -21,6 +28,12 @@ const OnlineGame = () => {
     handleFindNewGame,
   } = useChessServerGameState();
   const { messageHistory, handlePostMessage } = useChessServerChat();
+  const gameStatus = useRef("");
+
+  //store game status as a ref to ensure we do not mutate handleAbandon and accidentally call our 'unmount' useEffect hook
+  useEffect(() => {
+    gameStatus.current = gameState.status;
+  }, [gameState.status]);
 
   const { isConnected, networkError, usernameRequired, handleConnect } =
     useContext(SocketContext);
@@ -41,10 +54,13 @@ const OnlineGame = () => {
     [handlePostMessage, gameState.id]
   );
 
-  const handleLeave = useCallback(() => {
+  const handleLeavePage = useCallback(() => {
+    if (gameStatus.current === "IN_PROGRESS") {
+      handleForfeit();
+    }
+
     handleLeaveGame();
-    navigate("/");
-  }, [handleLeaveGame, navigate]);
+  }, [handleLeaveGame, handleForfeit]);
 
   const handleLeaveAndFindNewGame = useCallback(() => {
     handleLeaveGame();
@@ -55,6 +71,16 @@ const OnlineGame = () => {
     () => ["CHECKMATE", "STALEMATE", "FORFEIT"].includes(gameState.status),
     [gameState.status]
   );
+
+  const handleLeave = useCallback(() => {
+    //navigating away will unmount the page and handle forfeit / leaving events
+    navigate("/");
+  }, [navigate]);
+
+  useEffect(() => {
+    //if leaving page via back button or similar, consider active game abandoned
+    return () => handleLeavePage();
+  }, [handleLeavePage]);
 
   return (
     <div className="wrapper">
@@ -110,4 +136,4 @@ const OnlineGame = () => {
   );
 };
 
-export default OnlineGame;
+export default OnlineGameWithContext;

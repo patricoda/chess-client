@@ -1,7 +1,7 @@
 import "./App.css";
 import GameTypeSelector from "./components/gameTypeSelector";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { Suspense, lazy, useContext } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Suspense, lazy } from "react";
 
 const OfflineGame = lazy(() => import("./components/offlineGame"));
 const OnlineGame = lazy(() => import("./components/onlineGame"));
