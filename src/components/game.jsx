@@ -1,24 +1,23 @@
 import ChessBoard from "./chessboard";
 import PromotionSelector from "./promotionSelector";
 
-export const Game = ({ gameState, handleMovePiece, handlePromotePiece }) => {
-  const isPlayersTurn =
-    gameState.clientPlayer.allegiance === gameState.playerTurn;
+export const Game = ({ gameState, handleMovePiece, handlePromotePiece, playerAllegiance }) => {
+  const isPlayersTurn = playerAllegiance === gameState.playerTurn;
 
   return (
     <>
       {isPlayersTurn && gameState.isAwaitingPromotionSelection && (
         <PromotionSelector
-          allegiance={gameState.clientPlayer.allegiance}
+          allegiance={gameState.playerTurn}
           promotionHandler={handlePromotePiece}
         />
       )}
       {!!gameState.boardState && (
         <ChessBoard
           moveHandler={handleMovePiece}
+          playerAllegiance={playerAllegiance}
           boardState={gameState.boardState}
           legalMoves={gameState.legalMoves}
-          clientPlayer={gameState.clientPlayer}
           isPlayersTurn={isPlayersTurn}
         />
       )}

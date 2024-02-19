@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { SocketContext } from "../../context/socket";
 
-export const useChessServerChat = () => {
+export const useChat = () => {
   const [messageHistory, setMessageHistory] = useState([]);
 
   const { setEventListener, handlePostEvent } = useContext(SocketContext);
@@ -22,4 +22,4 @@ export const useChessServerChat = () => {
   return { messageHistory, handlePostMessage };
 };
 
-export default useChessServerChat;
+export default useChat;

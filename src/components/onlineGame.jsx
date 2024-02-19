@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
-import useChessServerChat from "../hooks/server/useChessServerChat";
-import useChessServerGameState from "../hooks/server/useChessServerGameState";
+import useChat from "../hooks/online/useChat";
+import useGameState from "../hooks/online/useGameState";
 import ChatRoom from "./chatRoom";
 import SocketContext from "../context/socket";
 import NewUserDialog from "./dialog/newUserDialog";
@@ -10,6 +10,7 @@ import { Dialog } from "./dialog/dialog";
 import { useNavigate } from "react-router-dom";
 import GameResultDialog from "./dialog/gameResultDialog";
 import { SocketContextProvider } from "../context/socketProvider";
+import { GameStatus } from "../enums/enums";
 
 const OnlineGameWithContext = () => (
   <SocketContextProvider>
@@ -26,8 +27,8 @@ const OnlineGame = () => {
     handleForfeit,
     handleLeaveGame,
     handleFindNewGame,
-  } = useChessServerGameState();
-  const { messageHistory, handlePostMessage } = useChessServerChat();
+  } = useGameState();
+  const { messageHistory, handlePostMessage } = useChat();
   const gameStatus = useRef("");
 
   //store game status as a ref to ensure we do not mutate handleAbandon and accidentally call our 'unmount' useEffect hook
@@ -55,7 +56,7 @@ const OnlineGame = () => {
   );
 
   const handleLeavePage = useCallback(() => {
-    if (gameStatus.current === "IN_PROGRESS") {
+    if (gameStatus.current === GameStatus.IN_PROGRESS) {
       handleForfeit();
     }
 
@@ -68,7 +69,10 @@ const OnlineGame = () => {
   }, [handleLeaveGame, handleFindNewGame]);
 
   const hasGameEnded = useMemo(
-    () => ["CHECKMATE", "STALEMATE", "FORFEIT"].includes(gameState.status),
+    () =>
+      [GameStatus.CHECKMATE, GameStatus.STALEMATE, GameStatus.FORFEIT].includes(
+        gameState.status
+      ),
     [gameState.status]
   );
 
@@ -102,6 +106,7 @@ const OnlineGame = () => {
             gameState={gameState}
             handleMovePiece={handleMovePiece}
             handlePromotePiece={handlePromotePiece}
+            playerAllegiance={gameState.clientPlayer.allegiance}
           />
           <ChatRoom
             messageHistory={messageHistory}

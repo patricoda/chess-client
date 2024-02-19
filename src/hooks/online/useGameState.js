@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect } from "react";
 import { SocketContext } from "../../context/socket";
 import { useImmerReducer } from "use-immer";
 
-export const useChessServerGameState = () => {
+export const useGameState = () => {
   const {
     connectedUser,
     setEventListener,
@@ -152,4 +152,4 @@ export const useChessServerGameState = () => {
   };
 };
 
-export default useChessServerGameState;
+export default useGameState;

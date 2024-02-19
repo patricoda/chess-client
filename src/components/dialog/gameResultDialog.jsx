@@ -7,13 +7,7 @@ const getGameResultContent = (gameState) => {
   if (gameState.status === "STALEMATE") {
     content = <p>Stalemate!</p>;
   } else {
-    content = (
-      <p>
-        {gameState.winningPlayer?.userId === gameState.clientPlayer?.userId
-          ? "You win!"
-          : "You lose!"}
-      </p>
-    );
+    content = <p>Checkmate! {gameState.winningPlayer.allegiance} wins!</p>;
   }
 
   return content;

@@ -1,6 +1,10 @@
 import { immerable } from "immer";
-import Tile from "./tile";
-import { COLUMN_VALUES, ROW_VALUES, boardDimensions } from "../../utils/values";
+import Tile from "./tile.js";
+import {
+  COLUMN_VALUES,
+  ROW_VALUES,
+  boardDimensions,
+} from "../../utils/config.js";
 
 export default class Board {
   [immerable] = true;
@@ -28,4 +32,7 @@ export default class Board {
       COLUMN_VALUES.indexOf(col)
     );
   }
+
+  //TODO: convert board to simple board state object
+  toFen() {}
 }

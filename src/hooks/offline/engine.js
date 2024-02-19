@@ -1,12 +1,11 @@
-import Piece from "../../classes/piece";
-import Pawn from "../../classes/pawn";
+import Piece from "../../classes/piece.js";
 import {
   Allegiance,
   DirectionOperator,
   PieceType,
   SlidingPieceType,
-} from "../../enums/enums";
-import { boardDimensions } from "../../utils/values";
+} from "../../enums/enums.js";
+import { boardDimensions } from "../../utils/config.js";
 
 export const setPieces = (board) => {
   board.tiles[0][0].piece = new Piece(Allegiance.BLACK, PieceType.ROOK);
@@ -18,23 +17,23 @@ export const setPieces = (board) => {
   board.tiles[0][6].piece = new Piece(Allegiance.BLACK, PieceType.KNIGHT);
   board.tiles[0][7].piece = new Piece(Allegiance.BLACK, PieceType.ROOK);
 
-  board.tiles[1][0].piece = new Pawn(Allegiance.BLACK);
-  board.tiles[1][1].piece = new Pawn(Allegiance.BLACK);
-  board.tiles[1][2].piece = new Pawn(Allegiance.BLACK);
-  board.tiles[1][3].piece = new Pawn(Allegiance.BLACK);
-  board.tiles[1][4].piece = new Pawn(Allegiance.BLACK);
-  board.tiles[1][5].piece = new Pawn(Allegiance.BLACK);
-  board.tiles[1][6].piece = new Pawn(Allegiance.BLACK);
-  board.tiles[1][7].piece = new Pawn(Allegiance.BLACK);
+  board.tiles[1][0].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
+  board.tiles[1][1].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
+  board.tiles[1][2].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
+  board.tiles[1][3].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
+  board.tiles[1][4].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
+  board.tiles[1][5].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
+  board.tiles[1][6].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
+  board.tiles[1][7].piece = new Piece(Allegiance.BLACK, PieceType.PAWN);
 
-  board.tiles[6][0].piece = new Pawn(Allegiance.WHITE);
-  board.tiles[6][1].piece = new Pawn(Allegiance.WHITE);
-  board.tiles[6][2].piece = new Pawn(Allegiance.WHITE);
-  board.tiles[6][3].piece = new Pawn(Allegiance.WHITE);
-  board.tiles[6][4].piece = new Pawn(Allegiance.WHITE);
-  board.tiles[6][5].piece = new Pawn(Allegiance.WHITE);
-  board.tiles[6][6].piece = new Pawn(Allegiance.WHITE);
-  board.tiles[6][7].piece = new Pawn(Allegiance.WHITE);
+  board.tiles[6][0].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
+  board.tiles[6][1].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
+  board.tiles[6][2].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
+  board.tiles[6][3].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
+  board.tiles[6][4].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
+  board.tiles[6][5].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
+  board.tiles[6][6].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
+  board.tiles[6][7].piece = new Piece(Allegiance.WHITE, PieceType.PAWN);
 
   board.tiles[7][0].piece = new Piece(Allegiance.WHITE, PieceType.ROOK);
   board.tiles[7][1].piece = new Piece(Allegiance.WHITE, PieceType.KNIGHT);
@@ -98,14 +97,14 @@ export const movePiece = (board, source, destination) => {
   sourceTile.piece = null;
 };
 
-export const getCheckingPieces = ({ board, playerTurn }) => {
+export const getCheckingPieces = (board, allegiance) => {
   const flatTileArray = board.tiles.flat();
 
   //test moves from king tile for different types of movement type, and see if that piece is present
   //to determine
   const kingTile = flatTileArray.find(
     ({ piece }) =>
-      piece?.type === PieceType.KING && piece?.allegiance === playerTurn
+      piece?.type === PieceType.KING && piece?.allegiance === allegiance
   );
 
   const direction =
@@ -121,7 +120,7 @@ export const getCheckingPieces = ({ board, playerTurn }) => {
     const tile = board.getTile(row, col);
     const { piece } = tile;
 
-    return piece?.type === PieceType.PAWN && piece?.allegiance !== playerTurn
+    return piece?.type === PieceType.PAWN && piece?.allegiance !== allegiance
       ? [...acc, tile]
       : acc;
   }, []);
@@ -132,7 +131,7 @@ export const getCheckingPieces = ({ board, playerTurn }) => {
       const { piece } = tile;
 
       return piece?.type === PieceType.KNIGHT &&
-        piece?.allegiance !== playerTurn
+        piece?.allegiance !== allegiance
         ? [...acc, tile]
         : acc;
     },
@@ -146,7 +145,7 @@ export const getCheckingPieces = ({ board, playerTurn }) => {
 
       return (piece?.type === PieceType.ROOK ||
         piece?.type === PieceType.QUEEN) &&
-        piece?.allegiance !== playerTurn
+        piece?.allegiance !== allegiance
         ? [...acc, tile]
         : acc;
     },
@@ -160,7 +159,19 @@ export const getCheckingPieces = ({ board, playerTurn }) => {
 
       return (piece?.type === PieceType.BISHOP ||
         piece?.type === PieceType.QUEEN) &&
-        piece?.allegiance !== playerTurn
+        piece?.allegiance !== allegiance
+        ? [...acc, tile]
+        : acc;
+    },
+    []
+  );
+
+  const kingCheckingTiles = getOmnidirectionalMoves(board, kingTile, 2).reduce(
+    (acc, { row, col }) => {
+      const tile = board.getTile(row, col);
+      const { piece } = tile;
+
+      return piece?.type === PieceType.KING && piece?.allegiance !== allegiance
         ? [...acc, tile]
         : acc;
     },
@@ -172,6 +183,7 @@ export const getCheckingPieces = ({ board, playerTurn }) => {
     ...knightCheckingTiles,
     ...lateralCheckingTiles,
     ...diagonalCheckingTiles,
+    ...kingCheckingTiles,
   ];
 
   return checkingTiles;
@@ -306,26 +318,26 @@ const handleSingleCheck = (
   }
 };
 
-export const getActivePlayerValidMoves = ({ board, playerTurn }) => {
+export const getAllegianceValidMoves = ({ board, allegiance }) => {
   const flattenedTileArray = board.tiles.flat();
 
   const tilesWithValidMoves = flattenedTileArray.filter(
-    ({ piece }) => piece?.allegiance === playerTurn && piece.validMoves.length
+    ({ piece }) => piece?.allegiance === allegiance && piece.validMoves.length
   );
 
   return tilesWithValidMoves;
 };
 
-export const generateLegalMoves = ({
+export const getLegalMoves = ({
   board,
-  playerTurn,
+  allegiance,
   checkingPieces,
   moveHistory,
 }) => {
   const tiles = board.tiles.flat();
 
   const currentPlayerPopulatedTiles = tiles.filter(
-    (tile) => tile.piece?.allegiance === playerTurn
+    (tile) => tile.piece?.allegiance === allegiance
   );
 
   for (const tile of currentPlayerPopulatedTiles) {
@@ -353,10 +365,35 @@ export const generateLegalMoves = ({
   }
 
   //filter king moves based on attacking tiles, etc
-  evaluateLegalKngMoves(board, kingTile);
+  evaluateLegalKingMoves(board, kingTile);
+
+  return currentPlayerPopulatedTiles
+    .filter(({ piece }) => {
+      return piece.type === PieceType.PAWN
+        ? //TODO: can we do something about this?
+          piece.captureMoves.length || piece.pushMoves.length
+        : piece.validMoves.length;
+    })
+    .reduce(
+      (
+        prev,
+        { notation, piece: { type, validMoves, pushMoves, captureMoves } }
+      ) => ({
+        ...prev,
+        [notation]:
+          type === PieceType.PAWN
+            ? [...pushMoves, ...captureMoves].map(
+                ({ row, col }) => board.getTile(row, col).notation
+              )
+            : validMoves.map(
+                ({ row, col }) => board.getTile(row, col).notation
+              ),
+      }),
+      {}
+    );
 };
 
-export const evaluateLegalKngMoves = (board, kingTile) => {
+export const evaluateLegalKingMoves = (board, kingTile) => {
   //for each move, move the king temporarily, and see if it would be in check
   kingTile.piece.validMoves = kingTile.piece.validMoves.filter((move) => {
     const destinationTile = board.getTile(move.row, move.col);
@@ -366,10 +403,8 @@ export const evaluateLegalKngMoves = (board, kingTile) => {
     destinationTile.piece = kingTile.piece;
     kingTile.piece = null;
 
-    const tileIsAttacked = !!getCheckingPieces({
-      board,
-      playerTurn: kingPiece.allegiance,
-    }).length;
+    const tileIsAttacked = !!getCheckingPieces(board, kingPiece.allegiance)
+      .length;
 
     destinationTile.piece = piece;
     kingTile.piece = kingPiece;
@@ -539,7 +574,9 @@ const getPawnMoves = (board, actionedTile, mostRecentMove) => {
 const getPawnPushMoves = ({ tiles }, { row, col, piece }, direction) =>
   [
     tiles[nextTile(row, 1, direction)]?.[col],
-    !piece.hasMoved && tiles[nextTile(row, 2, direction)]?.[col],
+    !piece.hasMoved &&
+      !tiles[nextTile(row, 1, direction)]?.[col].piece &&
+      tiles[nextTile(row, 2, direction)]?.[col],
   ]
     .filter((tile) => tile && !tile.piece)
     .map(({ row, col }) => ({
@@ -565,11 +602,9 @@ const getPawnCaptureMoves = (
     }));
 
   if (mostRecentMove) {
-    const mostRecentMoveSourceTile = board.getTileByCoords(
-      mostRecentMove.source
-    );
+    const mostRecentMoveSourceTile = board.getTileByCoords(mostRecentMove.from);
     const mostRecentMoveDestinationTile = board.getTileByCoords(
-      mostRecentMove.destination
+      mostRecentMove.to
     );
 
     //check for en passant

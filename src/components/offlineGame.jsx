@@ -1,28 +1,32 @@
-import { memo } from "react";
-import Chessboard from "./chessboard";
-import useChessEngine from "../hooks/chessEngine/useChessEngine";
+import { memo, useMemo } from "react";
+import useGameState from "../hooks/offline/useGameState";
+import { Game } from "./game";
+import GameResultDialog from "./dialog/gameResultDialog";
+import { GameStatus } from "../enums/enums";
 
+//TODO: put this back in
 const flipBoardOnPlayerChange = false;
 
 const OfflineGame = () => {
-  //TODO: move promotable tile to board, perhaps import PGN string in for board setup
-  const {
-    board,
-    playerTurn,
-    promotableCoords,
-    handleMovePiece,
-    handlePromotePiece,
-  } = useChessEngine();
+  const { gameState, handleMovePiece, handlePromotePiece, handleForfeit } =
+    useGameState();
+
+  const hasGameEnded = useMemo(
+    () =>
+      [GameStatus.CHECKMATE, GameStatus.STALEMATE, GameStatus.FORFEIT].includes(
+        gameState.status
+      ),
+    [gameState.status]
+  );
 
   return (
     <>
-      <Chessboard
-        promotableCoords={promotableCoords}
-        onPromotionHandler={handlePromotePiece}
-        moveHandler={handleMovePiece}
-        board={board}
-        playerTurn={playerTurn}
-        flipBoardOnPlayerChange={flipBoardOnPlayerChange}
+      {hasGameEnded && <GameResultDialog gameState={gameState} />}
+      <Game
+        gameState={gameState}
+        handleMovePiece={handleMovePiece}
+        handlePromotePiece={handlePromotePiece}
+        playerAllegiance={gameState.playerTurn}
       />
     </>
   );

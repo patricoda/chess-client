@@ -44,7 +44,7 @@ const Piece = ({
 const Tile = ({
   tile,
   selectedTile,
-  clientPlayer: { allegiance: playerAllegiance },
+  playerAllegiance,
   moveHandler,
   legalMoves,
   ...props
@@ -84,8 +84,7 @@ const Row = ({ tiles, ...props }) => {
   );
 };
 
-const ChessBoard = ({ boardState, moveHandler, clientPlayer, ...props }) => {
-  const { allegiance } = clientPlayer;
+const ChessBoard = ({ boardState, moveHandler, playerAllegiance, ...props }) => {
   const [selectedTile, setSelectedTile] = useState(null);
 
   const onSelectTileHandler = useCallback(
@@ -109,7 +108,7 @@ const ChessBoard = ({ boardState, moveHandler, clientPlayer, ...props }) => {
 
   return (
     <table
-      className={`chessboard ${allegiance === Allegiance.BLACK ? "flip" : ""}`}
+      className={`chessboard ${playerAllegiance === Allegiance.BLACK ? "flip" : ""}`}
     >
       <tbody>
         {boardState.tiles.map((tiles, i) => (
@@ -119,7 +118,7 @@ const ChessBoard = ({ boardState, moveHandler, clientPlayer, ...props }) => {
             selectedTile={selectedTile}
             selectTileHandler={onSelectTileHandler}
             moveHandler={onMoveHandler}
-            clientPlayer={clientPlayer}
+            playerAllegiance={playerAllegiance}
             {...props}
           />
         ))}
