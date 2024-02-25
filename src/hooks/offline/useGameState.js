@@ -1,11 +1,11 @@
+import Game from "@patricoda/chess-engine";
 import { useEffect, useCallback, useRef, useState } from "react";
-import Game from "../../classes/game";
 
 //TODO: make this look like our server API, return same object for reusability of using components
 export const useGameState = () => {
   //todo: pass players in
   const gameRef = useRef(
-    new Game(-1, [{ userId: "player1" }, { userId: "player2" }])
+    new Game([{ userId: "player1" }, { userId: "player2" }])
   );
   const [gameState, setGameState] = useState({});
 
