@@ -1,31 +1,23 @@
 import { Bishop, Knight, Queen, Rook } from "./piece";
 
-export const PromotionSelect = ({ allegiance, promotionHandler }) => (
-  <div id="overlay">
-    <div id="promotionSelection">
-      <div
-        class="piece-promotion-box"
-        data-value="QUEEN"
-        onClick={promotionHandler}
-      >
+export const PromotionSelector = ({ allegiance, promotionHandler }) => (
+  <div className="overlay">
+    <div id="promotionSelection" className="selectionContainer">
+      <div className="option-box" data-value="QUEEN" onClick={promotionHandler}>
         <Queen allegiance={allegiance} />
       </div>
-      <div
-        class="piece-promotion-box"
-        data-value="ROOK"
-        onClick={promotionHandler}
-      >
+      <div className="option-box" data-value="ROOK" onClick={promotionHandler}>
         <Rook allegiance={allegiance} />
       </div>
       <div
-        class="piece-promotion-box"
+        className="option-box"
         data-value="KNIGHT"
         onClick={promotionHandler}
       >
         <Knight allegiance={allegiance} />
       </div>
       <div
-        class="piece-promotion-box"
+        className="option-box"
         data-value="BISHOP"
         onClick={promotionHandler}
       >
@@ -35,4 +27,4 @@ export const PromotionSelect = ({ allegiance, promotionHandler }) => (
   </div>
 );
 
-export default PromotionSelect;
+export default PromotionSelector;

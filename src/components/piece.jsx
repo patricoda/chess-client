@@ -5,7 +5,7 @@ import {
   faChessBishop,
   faChessRook,
   faChessKnight,
-  faChessPawn
+  faChessPawn,
 } from "@fortawesome/free-solid-svg-icons";
 
 export const Pawn = ({ allegiance }) =>

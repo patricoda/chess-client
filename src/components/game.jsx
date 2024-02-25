@@ -1,31 +1,26 @@
-import { memo } from "react";
-import Chessboard from "./chessboard";
-import PromotionSelect from "./promotionSelect";
-import useChessEngine from "../hooks/chessEngine/useChessEngine";
+import ChessBoard from "./chessboard";
+import PromotionSelector from "./promotionSelector";
 
-const flipBoardOnPlayerChange = false;
-
-const Game = () => {
-  //TODO: move promotable tile to board, perhaps import PGN string in for board setup
-  const { board, activePlayer, promotableCoords, movePiece, promotePiece } =
-    useChessEngine();
+export const Game = ({ gameState, handleMovePiece, handlePromotePiece, playerAllegiance }) => {
+  const isPlayersTurn = playerAllegiance === gameState.playerTurn;
 
   return (
     <>
-      {!!promotableCoords && (
-        <PromotionSelect
-          allegiance={activePlayer}
-          promotionHandler={promotePiece}
+      {isPlayersTurn && gameState.isAwaitingPromotionSelection && (
+        <PromotionSelector
+          allegiance={gameState.playerTurn}
+          promotionHandler={handlePromotePiece}
         />
       )}
-      <Chessboard
-        moveHandler={movePiece}
-        board={board}
-        activePlayer={activePlayer}
-        flipBoardOnPlayerChange={flipBoardOnPlayerChange}
-      />
+      {!!gameState.boardState && (
+        <ChessBoard
+          moveHandler={handleMovePiece}
+          playerAllegiance={playerAllegiance}
+          boardState={gameState.boardState}
+          legalMoves={gameState.legalMoves}
+          isPlayersTurn={isPlayersTurn}
+        />
+      )}
     </>
   );
 };
-
-export default memo(Game);
