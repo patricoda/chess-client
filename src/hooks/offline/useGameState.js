@@ -1,12 +1,8 @@
 import Game from "@patricoda/chess-engine";
 import { useEffect, useCallback, useRef, useState } from "react";
 
-//TODO: make this look like our server API, return same object for reusability of using components
 export const useGameState = () => {
-  //todo: pass players in
-  const gameRef = useRef(
-    new Game([{ userId: "player1" }, { userId: "player2" }])
-  );
+  const gameRef = useRef(new Game());
   const [gameState, setGameState] = useState({});
 
   const updateGameState = useCallback(() => {
@@ -19,10 +15,7 @@ export const useGameState = () => {
 
   const handleMovePiece = useCallback(
     (from, to) => {
-      gameRef.current.move(gameRef.current.getActivePlayer().userId, {
-        from,
-        to,
-      });
+      gameRef.current.move({ from, to });
       updateGameState();
     },
     [updateGameState]
@@ -30,7 +23,7 @@ export const useGameState = () => {
 
   const handlePromotePiece = useCallback(
     (e) => {
-      gameRef.current.promote(gameRef.current.getActivePlayer().userId, {
+      gameRef.current.promote({
         newType: e.currentTarget.dataset.value,
       });
       updateGameState();
@@ -39,7 +32,7 @@ export const useGameState = () => {
   );
 
   const handleForfeit = useCallback(() => {
-    gameRef.current.forfeit(gameRef.current.getActivePlayer().userId);
+    gameRef.current.forfeit(gameRef.current.playerTurn);
     updateGameState();
   }, [updateGameState]);
 
