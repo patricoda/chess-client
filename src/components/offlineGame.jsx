@@ -2,7 +2,7 @@ import { memo, useMemo } from "react";
 import useGameState from "../hooks/offline/useGameState";
 import { Game } from "./game";
 import GameResultDialog from "./dialog/gameResultDialog";
-import { GameStatus } from "../enums/enums";
+import { GameStatus } from "@patricoda/chess-engine";
 
 //TODO: put this back in
 const flipBoardOnPlayerChange = false;

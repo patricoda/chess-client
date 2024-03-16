@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { PieceType, Allegiance } from "../enums/enums";
+import { PieceType, Allegiance } from "@patricoda/chess-engine";
 import { Pawn, Rook, Knight, Bishop, King, Queen } from "./piece";
 
 const renderPiece = ({ type, allegiance }) => {
@@ -84,7 +84,12 @@ const Row = ({ tiles, ...props }) => {
   );
 };
 
-const ChessBoard = ({ boardState, moveHandler, playerAllegiance, ...props }) => {
+const ChessBoard = ({
+  boardState,
+  moveHandler,
+  playerAllegiance,
+  ...props
+}) => {
   const [selectedTile, setSelectedTile] = useState(null);
 
   const onSelectTileHandler = useCallback(
@@ -108,7 +113,9 @@ const ChessBoard = ({ boardState, moveHandler, playerAllegiance, ...props }) => 
 
   return (
     <table
-      className={`chessboard ${playerAllegiance === Allegiance.BLACK ? "flip" : ""}`}
+      className={`chessboard ${
+        playerAllegiance === Allegiance.BLACK ? "flip" : ""
+      }`}
     >
       <tbody>
         {boardState.tiles.map((tiles, i) => (

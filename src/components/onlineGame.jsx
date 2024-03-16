@@ -10,7 +10,7 @@ import { Dialog } from "./dialog/dialog";
 import { useNavigate } from "react-router-dom";
 import GameResultDialog from "./dialog/gameResultDialog";
 import { SocketContextProvider } from "../context/socketProvider";
-import { GameStatus } from "../enums/enums";
+import { GameStatus } from "@patricoda/chess-engine";
 
 const OnlineGameWithContext = () => (
   <SocketContextProvider>

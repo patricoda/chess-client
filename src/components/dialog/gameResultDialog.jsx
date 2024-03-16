@@ -6,8 +6,10 @@ const getGameResultContent = (gameState) => {
 
   if (gameState.status === "STALEMATE") {
     content = <p>Stalemate!</p>;
+  } else if (gameState.status === "FORFEIT") {
+    content = <p>Forfeit! {gameState.winningPlayer} wins!</p>;
   } else {
-    content = <p>Checkmate! {gameState.winningPlayer.allegiance} wins!</p>;
+    content = <p>Checkmate! {gameState.winningPlayer} wins!</p>;
   }
 
   return content;

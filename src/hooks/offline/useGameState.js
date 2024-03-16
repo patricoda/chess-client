@@ -1,4 +1,4 @@
-import Game from "@patricoda/chess-engine";
+import { Game } from "@patricoda/chess-engine";
 import { useEffect, useCallback, useRef, useState } from "react";
 
 export const useGameState = () => {
