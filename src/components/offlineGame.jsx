@@ -8,8 +8,7 @@ import { GameStatus } from "@patricoda/chess-engine";
 const flipBoardOnPlayerChange = false;
 
 const OfflineGame = () => {
-  const { gameState, handleMovePiece, handlePromotePiece, handleForfeit } =
-    useGameState();
+  const { gameState, handleMovePiece, handlePromotePiece } = useGameState();
 
   const hasGameEnded = useMemo(
     () =>

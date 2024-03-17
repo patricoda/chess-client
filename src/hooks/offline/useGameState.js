@@ -23,9 +23,7 @@ export const useGameState = () => {
 
   const handlePromotePiece = useCallback(
     (e) => {
-      gameRef.current.promote({
-        newType: e.currentTarget.dataset.value,
-      });
+      gameRef.current.promote(e.currentTarget.dataset.value);
       updateGameState();
     },
     [updateGameState]

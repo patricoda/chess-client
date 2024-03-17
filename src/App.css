@@ -1,38 +1,44 @@
 .wrapper {
   display: flex;
+  height: 100vh;
   justify-content: center;
+  align-items: center;
 }
 
-.chessboard {
-  height: 640px;
-  width: 640px;
-  border-collapse: collapse;
+dialog {
+  background-color: #2b2c2e;
+  color: #fff;
+
+  button {
+    color: #fff;
+  }
 }
 
-.chessboard td {
-  text-align: center;
-  height: 80px;
-  width: 80px;
+.button-holder {
+  display: flex;
+  position: relative;
 }
 
-.chessboard .validMoveTile {
-  background-color: rgba(0, 0, 255, 0.4) !important;
-}
+.game-container {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  
+  .button-holder {
+    top: 10px;
+    align-self: flex-end;
+  }
 
-.chessboard tr:nth-child(odd) td:nth-child(odd) {
-  background-color: wheat;
-}
-
-.chessboard tr:nth-child(odd) td:nth-child(even) {
-  background-color: olivedrab;
-}
-
-tr:nth-child(even) td:nth-child(even) {
-  background-color: wheat;
-}
-
-tr:nth-child(even) td:nth-child(odd) {
-  background-color: rgb(107, 142, 35);
+  .overlay {
+    .button-holder {
+      margin: 0;
+      top: 0;
+      left: 0;
+      
+    align-self: auto;
+    }
+  }
 }
 
 .overlay {
@@ -45,23 +51,114 @@ tr:nth-child(even) td:nth-child(odd) {
   background-color: rgba(107, 142, 35, 0.4);
 }
 
-.selectionContainer {
-  display: flex;
-  align-items: center;
-  z-index: 2;
+.game-type-selector { 
+  .button-holder {
+    flex-flow: column;
+    .svg-inline--fa {
+      font-size: 6em;
+    }
+  }
+
+  button {
+    height:160px;
+    width:160px;
+    margin: 10px;
+  }
 }
 
-.selectionContainer .option-box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 80px;
-  width: 80px;
-  margin: 5px;
+button {
+  background-color: #2b2c2e;
+  border-radius: 3px;
   cursor: pointer;
-  background-color: rgba(107, 142, 35, 0.9);
+  margin-bottom: 2px;
+
+  a {
+    color: inherit;
+  }
+}
+
+.chessboard {
+  height: 320px;
+  width: 320px;
+  border-collapse: collapse;
+  outline: 5px outset;
+
+  .svg-inline--fa  {
+    font-size: 1.5em;
+  }
+
+  .validMoveTile {
+    opacity: 0.5;
+  }
+
+  tr:nth-child(odd) td:nth-child(odd), tr:nth-child(even) td:nth-child(even) {
+    background-color: #f5deb3d9;
+  }
+
+  tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
+    background-color: #6b8e23cf;
+  }
+
+  td {
+    text-align: center;
+    height: 12.5%;
+    width: 12.5%;
+  }
 }
 
 .flip {
   transform: rotate(180deg);
 }
+
+.promotion-selection-container {
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+
+  .promotion-option {
+    height: 40px;
+    width: 40px;
+    margin: 5px;
+    cursor: pointer;
+    background-color: rgba(107, 142, 35, 0.9);
+  }
+
+  .svg-inline--fa  {
+    font-size: 2em;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .chessboard {
+    height: 640px;
+    width: 640px;
+    .svg-inline--fa {
+      font-size: 3em;
+    }
+  }
+  
+  .game-type-selector { 
+    .button-holder {
+      flex-flow: row;
+    }
+  }
+
+  .button-holder {
+    .svg-inline--fa  {
+      font-size: 2em;
+    }
+  }
+
+  .promotion-selection-container {
+    .promotion-option {
+      height: 80px;
+      width: 80px;
+    }
+
+    .svg-inline--fa  {
+      font-size: 3em;
+    }
+  }
+}
+
