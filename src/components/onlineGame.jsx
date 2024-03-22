@@ -69,10 +69,12 @@ const OnlineGame = () => {
     [gameState.status]
   );
 
-  const handleLeave = useCallback(() => {
-    //navigating away will unmount the page and handle forfeit / leaving events
-    navigate("/");
-  }, [navigate]);
+  const handleLeave = useCallback(
+    () =>
+      //navigating away will unmount the page and handle forfeit / leaving events
+      navigate("/"),
+    [navigate]
+  );
 
   useEffect(() => {
     //if leaving page via back button or similar, consider active game abandoned

@@ -2,7 +2,7 @@ import { Game } from "@patricoda/chess-engine";
 import { useEffect, useCallback, useRef, useState } from "react";
 
 export const useGameState = () => {
-  const gameRef = useRef(new Game());
+  const gameRef = useRef(null);
   const [gameState, setGameState] = useState({});
 
   const updateGameState = useCallback(() => {
@@ -34,16 +34,22 @@ export const useGameState = () => {
     updateGameState();
   }, [updateGameState]);
 
-  useEffect(() => {
+  const handleStartGame = useCallback(() => {
+    gameRef.current = new Game();
     gameRef.current.init();
     updateGameState();
   }, [updateGameState]);
+
+  useEffect(() => {
+    handleStartGame();
+  }, [handleStartGame]);
 
   return {
     gameState,
     handleMovePiece,
     handlePromotePiece,
     handleForfeit,
+    handleStartGame,
   };
 };
 
