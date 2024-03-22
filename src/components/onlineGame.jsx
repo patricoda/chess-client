@@ -12,6 +12,10 @@ import { GameStatus } from "@patricoda/chess-engine";
 import ButtonHolder from "./buttonHolder";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFlag, faPlus, faSignOut } from "@fortawesome/free-solid-svg-icons";
+import LeaveButton from "./button/leaveButton";
+import ForfeitButton from "./button/forfeitButton";
+import LeaveIconButton from "./button/leaveIconButton";
+import NewGameButton from "./button/newGameButton";
 
 const OnlineGameWithContext = () => (
   <SocketContextProvider>
@@ -87,12 +91,14 @@ const OnlineGame = () => {
         isVisible={networkError && networkError !== "Invalid username"}
       >
         <p>{networkError}</p>
+        <LeaveButton onClick={handleLeave} />
       </ErrorDialog>
       {usernameRequired ? (
         <NewUserDialog handleSubmit={handleSubmit} isVisible={true} />
       ) : gameState.isAwaitingGame ? (
-        <Dialog isVisible={true}>
+        <Dialog isVisible={gameState.isAwaitingGame}>
           <p>Please wait...</p>
+          <LeaveButton onClick={handleLeave} />
         </Dialog>
       ) : (
         <>
@@ -107,29 +113,11 @@ const OnlineGame = () => {
             <ButtonHolder>
               {hasGameEnded ? (
                 <>
-                  <button
-                    onClick={handleLeaveAndFindNewGame}
-                    title="find new game"
-                    aria-label="find new game"
-                  >
-                    <FontAwesomeIcon icon={faPlus} inverse />
-                  </button>
-                  <button
-                    onClick={handleLeave}
-                    title="leave"
-                    aria-label="leave"
-                  >
-                    <FontAwesomeIcon icon={faSignOut} inverse />
-                  </button>
+                  <NewGameButton onClick={handleLeaveAndFindNewGame} />
+                  <LeaveIconButton onClick={handleLeave} />
                 </>
               ) : (
-                <button
-                  onClick={handleForfeit}
-                  title="forfeit"
-                  aria-label="forfeit"
-                >
-                  <FontAwesomeIcon icon={faFlag} inverse />
-                </button>
+                <ForfeitButton onClick={handleForfeit} />
               )}
             </ButtonHolder>
           </div>

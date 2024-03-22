@@ -7,6 +7,9 @@ import { useNavigate } from "react-router-dom";
 import ButtonHolder from "./buttonHolder";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFlag, faPlus, faSignOut } from "@fortawesome/free-solid-svg-icons";
+import NewGameButton from "./button/newGameButton";
+import LeaveIconButton from "./button/leaveIconButton";
+import ForfeitButton from "./button/forfeitButton";
 
 //TODO: put this back in
 const flipBoardOnPlayerChange = false;
@@ -44,25 +47,11 @@ const OfflineGame = () => {
         <ButtonHolder>
           {hasGameEnded ? (
             <>
-              <button
-                onClick={handleStartGame}
-                title="start new game"
-                aria-label="start new game"
-              >
-                <FontAwesomeIcon icon={faPlus} inverse />
-              </button>
-              <button onClick={handleLeave} title="leave" aria-label="leave">
-                <FontAwesomeIcon icon={faSignOut} inverse />
-              </button>
+              <NewGameButton onClick={handleStartGame} />
+              <LeaveIconButton onClick={handleLeave} />
             </>
           ) : (
-            <button
-              onClick={handleForfeit}
-              title="forfeit"
-              aria-label="forfeit"
-            >
-              <FontAwesomeIcon icon={faFlag} inverse />
-            </button>
+            <ForfeitButton onClick={handleForfeit} />
           )}
         </ButtonHolder>
       </div>
