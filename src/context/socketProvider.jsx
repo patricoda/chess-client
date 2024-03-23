@@ -36,6 +36,8 @@ export const SocketContextProvider = ({ children }) => {
     socket.current.connect();
   }, []);
 
+  const handleDisconnect = useCallback(() => socket.current.disconnect(), []);
+
   useEffect(() => {
     socket.current.on("SESSION_INITIALISED", (sessionData) => {
       //store session ID for reconnection
@@ -53,7 +55,10 @@ export const SocketContextProvider = ({ children }) => {
       setNetworkError(null);
     });
 
-    socket.current.on("disconnect", () => setIsConnected(false));
+    socket.current.on("disconnect", () => {
+      console.log("disconnected");
+      setIsConnected(false);
+    });
 
     socket.current.on("connect_error", (err) => {
       console.log(err.message);
@@ -83,6 +88,7 @@ export const SocketContextProvider = ({ children }) => {
       removeEventListener,
       handlePostEvent,
       handleConnect,
+      handleDisconnect,
     }),
     [
       isConnected,
@@ -93,6 +99,7 @@ export const SocketContextProvider = ({ children }) => {
       removeEventListener,
       handlePostEvent,
       handleConnect,
+      handleDisconnect,
     ]
   );
 

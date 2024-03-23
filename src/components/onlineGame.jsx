@@ -10,8 +10,6 @@ import GameResultDialog from "./dialog/gameResultDialog";
 import { SocketContextProvider } from "../context/socketProvider";
 import { GameStatus } from "@patricoda/chess-engine";
 import ButtonHolder from "./buttonHolder";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFlag, faPlus, faSignOut } from "@fortawesome/free-solid-svg-icons";
 import LeaveButton from "./button/leaveButton";
 import ForfeitButton from "./button/forfeitButton";
 import LeaveIconButton from "./button/leaveIconButton";
@@ -33,14 +31,8 @@ const OnlineGame = () => {
     handleLeaveGame,
     handleFindNewGame,
   } = useGameState();
-  const gameStatus = useRef("");
 
-  //store game status as a ref to ensure we do not mutate handleAbandon and accidentally call our 'unmount' useEffect hook
-  useEffect(() => {
-    gameStatus.current = gameState.status;
-  }, [gameState.status]);
-
-  const { networkError, usernameRequired, handleConnect } =
+  const { networkError, usernameRequired, handleConnect, handleDisconnect } =
     useContext(SocketContext);
 
   const handleSubmit = useCallback(
@@ -51,14 +43,6 @@ const OnlineGame = () => {
     },
     [handleConnect]
   );
-
-  const handleLeavePage = useCallback(() => {
-    if (gameStatus.current === GameStatus.IN_PROGRESS) {
-      handleForfeit();
-    }
-
-    handleLeaveGame();
-  }, [handleLeaveGame, handleForfeit]);
 
   const handleLeaveAndFindNewGame = useCallback(() => {
     handleLeaveGame();
@@ -82,8 +66,8 @@ const OnlineGame = () => {
 
   useEffect(() => {
     //if leaving page via back button or similar, consider active game abandoned
-    return () => handleLeavePage();
-  }, [handleLeavePage]);
+    return () => handleDisconnect();
+  }, [handleDisconnect]);
 
   return (
     <>

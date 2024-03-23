@@ -103,7 +103,7 @@ export const useGameState = () => {
 
   const handleFindNewGame = useCallback(() => {
     dispatch({ type: "IS_AWAITING_GAME" });
-    handlePostEvent("AWAITING_GAME");
+    handlePostEvent("FIND_GAME");
   }, [dispatch, handlePostEvent]);
 
   useEffect(() => {
@@ -138,7 +138,7 @@ export const useGameState = () => {
   //TODO do we want to do this automatically?
   useEffect(() => {
     if (connectedUser.userId) {
-      handlePostEvent("AWAITING_GAME");
+      handlePostEvent("FIND_GAME");
     }
   }, [handlePostEvent, connectedUser]);
 
