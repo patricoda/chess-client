@@ -87,24 +87,26 @@ const OnlineGame = () => {
       ) : (
         <>
           {hasGameEnded && <GameResultDialog gameState={gameState} />}
-          <div className="game-container">
-            <Game
-              gameState={gameState}
-              handleMovePiece={handleMovePiece}
-              handlePromotePiece={handlePromotePiece}
-              playerAllegiance={gameState.clientPlayer.allegiance}
-            />
-            <ButtonHolder>
-              {hasGameEnded ? (
-                <>
-                  <NewGameButton onClick={handleLeaveAndFindNewGame} />
-                  <LeaveIconButton onClick={handleLeave} />
-                </>
-              ) : (
-                <ForfeitButton onClick={handleForfeit} />
-              )}
-            </ButtonHolder>
-          </div>
+          {gameState.status !== GameStatus.NOT_STARTED && (
+            <div className="game-container">
+              <Game
+                gameState={gameState}
+                handleMovePiece={handleMovePiece}
+                handlePromotePiece={handlePromotePiece}
+                playerAllegiance={gameState.clientPlayer.allegiance}
+              />
+              <ButtonHolder>
+                {hasGameEnded ? (
+                  <>
+                    <NewGameButton onClick={handleLeaveAndFindNewGame} />
+                    <LeaveIconButton onClick={handleLeave} />
+                  </>
+                ) : (
+                  <ForfeitButton onClick={handleForfeit} />
+                )}
+              </ButtonHolder>
+            </div>
+          )}
         </>
       )}
     </>
