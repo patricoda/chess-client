@@ -40,7 +40,6 @@ export const useGameState = () => {
             clientPlayer,
             isAwaitingGame: false,
           };
-
         case "GAME_STATE_UPDATED":
           return {
             ...action.gameState,
