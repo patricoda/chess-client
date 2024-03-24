@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import useGameState from "../hooks/offline/useGameState";
 import { Game } from "./game";
 import GameResultDialog from "./dialog/gameResultDialog";
@@ -9,12 +9,11 @@ import NewGameButton from "./button/newGameButton";
 import LeaveIconButton from "./button/leaveIconButton";
 import ForfeitButton from "./button/forfeitButton";
 import WidgetContainer from "./widgetContainer";
-
-//TODO: put this back in
-const flipBoardOnPlayerChange = false;
+import { FlipPerspectiveForBlackButton } from "./button/changePerspectiveForBlackButton";
 
 const OfflineGame = () => {
   const navigate = useNavigate();
+  const [flipPerspectiveForBlack, setFlipPerspectiveForBlack] = useState(true);
   const {
     gameState,
     handleMovePiece,
@@ -43,6 +42,7 @@ const OfflineGame = () => {
             handleMovePiece={handleMovePiece}
             handlePromotePiece={handlePromotePiece}
             playerAllegiance={gameState.playerTurn}
+            flipPerspectiveForBlack={flipPerspectiveForBlack}
           />
           <WidgetContainer className="footer offline">
             <ButtonHolder>
@@ -52,7 +52,15 @@ const OfflineGame = () => {
                   <LeaveIconButton onClick={handleLeave} />
                 </>
               ) : (
-                <ForfeitButton onClick={handleForfeit} />
+                <>
+                  <FlipPerspectiveForBlackButton
+                    value={flipPerspectiveForBlack}
+                    onClick={() =>
+                      setFlipPerspectiveForBlack(!flipPerspectiveForBlack)
+                    }
+                  />
+                  <ForfeitButton onClick={handleForfeit} />
+                </>
               )}
             </ButtonHolder>
           </WidgetContainer>

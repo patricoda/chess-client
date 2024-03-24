@@ -79,9 +79,8 @@ const OnlineGame = () => {
         <p>{networkError}</p>
         <LeaveButton onClick={handleLeave} />
       </ErrorDialog>
-      {usernameRequired ? (
-        <NewUserDialog handleSubmit={handleSubmit} isVisible={true} />
-      ) : gameState.isAwaitingGame ? (
+      <NewUserDialog handleSubmit={handleSubmit} isVisible={usernameRequired} />
+      {gameState.isAwaitingGame ? (
         <Dialog isVisible={gameState.isAwaitingGame}>
           <p>Please wait...</p>
           <LeaveButton onClick={handleLeave} />

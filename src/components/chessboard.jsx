@@ -27,6 +27,7 @@ const Piece = ({
   playerAllegiance,
   selectTileHandler,
   isPlayersTurn,
+  shouldFlipBoard,
   children,
 }) => (
   <div
@@ -35,7 +36,7 @@ const Piece = ({
       isPlayersTurn &&
       selectTileHandler(tile)
     }
-    className={playerAllegiance === Allegiance.BLACK ? "flip" : ""}
+    className={shouldFlipBoard ? "flip" : ""}
   >
     {children}
   </div>
@@ -88,9 +89,12 @@ const ChessBoard = ({
   boardState,
   moveHandler,
   playerAllegiance,
+  flipPerspectiveForBlack,
   ...props
 }) => {
   const [selectedTile, setSelectedTile] = useState(null);
+  const shouldFlipBoard =
+    playerAllegiance === Allegiance.BLACK && flipPerspectiveForBlack;
 
   const onSelectTileHandler = useCallback(
     (tile) => {
@@ -112,11 +116,7 @@ const ChessBoard = ({
   );
 
   return (
-    <table
-      className={`chessboard ${
-        playerAllegiance === Allegiance.BLACK ? "flip" : ""
-      }`}
-    >
+    <table className={`chessboard ${shouldFlipBoard ? "flip" : ""}`}>
       <tbody>
         {boardState.tiles.map((tiles, i) => (
           <Row
@@ -126,6 +126,7 @@ const ChessBoard = ({
             selectTileHandler={onSelectTileHandler}
             moveHandler={onMoveHandler}
             playerAllegiance={playerAllegiance}
+            shouldFlipBoard={shouldFlipBoard}
             {...props}
           />
         ))}
