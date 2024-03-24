@@ -20,23 +20,14 @@ export const useGameState = () => {
           const newGameDetails = action.gameDetails;
           const newGameState = newGameDetails.gameState;
 
-          //map user details e.g. name and online status, onto players array
-          const players = newGameState.players.map((player) => ({
-            ...player,
-            ...newGameDetails.userDetails.find(
-              ({ id }) => id === player.userId
-            ),
-          }));
-
           //discover the player instance associated to the client
-          const clientPlayer = players.find(
+          const clientPlayer = newGameState.players.find(
             ({ userId }) => userId === connectedUser.userId
           );
 
           return {
             ...newGameState,
             boardState: JSON.parse(newGameState.boardState),
-            players,
             clientPlayer,
             isAwaitingGame: false,
           };
@@ -49,24 +40,6 @@ export const useGameState = () => {
             players: gameState.players,
             clientPlayer: gameState.clientPlayer,
           };
-        case "USER_CONNECTED":
-          const connectingUser = gameState.players.find(
-            ({ userId }) => userId === action.userId
-          );
-
-          if (connectingUser) {
-            connectingUser.isConnected = true;
-          }
-          break;
-        case "USER_DISCONNECTED":
-          const disconnectingUser = gameState.players.find(
-            ({ userId }) => userId === action.userId
-          );
-
-          if (disconnectingUser) {
-            disconnectingUser.isConnected = false;
-          }
-          break;
         default:
           break;
       }
@@ -134,7 +107,6 @@ export const useGameState = () => {
     };
   }, [setEventListener, removeEventListener, handlePostEvent, dispatch]);
 
-  //TODO do we want to do this automatically?
   useEffect(() => {
     if (connectedUser.userId) {
       handlePostEvent("FIND_GAME");

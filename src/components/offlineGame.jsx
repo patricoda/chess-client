@@ -8,6 +8,7 @@ import ButtonHolder from "./buttonHolder";
 import NewGameButton from "./button/newGameButton";
 import LeaveIconButton from "./button/leaveIconButton";
 import ForfeitButton from "./button/forfeitButton";
+import WidgetContainer from "./widgetContainer";
 
 //TODO: put this back in
 const flipBoardOnPlayerChange = false;
@@ -43,16 +44,18 @@ const OfflineGame = () => {
             handlePromotePiece={handlePromotePiece}
             playerAllegiance={gameState.playerTurn}
           />
-          <ButtonHolder>
-            {hasGameEnded ? (
-              <>
-                <NewGameButton onClick={handleStartGame} />
-                <LeaveIconButton onClick={handleLeave} />
-              </>
-            ) : (
-              <ForfeitButton onClick={handleForfeit} />
-            )}
-          </ButtonHolder>
+          <WidgetContainer className="footer offline">
+            <ButtonHolder>
+              {hasGameEnded ? (
+                <>
+                  <NewGameButton onClick={handleStartGame} />
+                  <LeaveIconButton onClick={handleLeave} />
+                </>
+              ) : (
+                <ForfeitButton onClick={handleForfeit} />
+              )}
+            </ButtonHolder>
+          </WidgetContainer>
         </div>
       )}
     </>
