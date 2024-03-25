@@ -1,6 +1,5 @@
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect, useReducer } from "react";
 import { SocketContext } from "../../context/socket";
-import { useImmerReducer } from "use-immer";
 
 export const useGameState = () => {
   const {
@@ -10,7 +9,7 @@ export const useGameState = () => {
     handlePostEvent,
   } = useContext(SocketContext);
 
-  const [gameState, dispatch] = useImmerReducer(
+  const [gameState, dispatch] = useReducer(
     (gameState, action) => {
       switch (action.type) {
         case "IS_AWAITING_GAME": {

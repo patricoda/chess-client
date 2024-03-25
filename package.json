@@ -6,16 +6,14 @@
     "@fortawesome/fontawesome-svg-core": "^6.2.1",
     "@fortawesome/free-solid-svg-icons": "^6.2.1",
     "@fortawesome/react-fontawesome": "^0.1.18",
-    "@patricoda/chess-engine": "^2.0.5",
+    "@patricoda/chess-engine": "^2.0.6",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
-    "immer": "^9.0.15",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.16.0",
     "socket.io-client": "^4.6.0",
-    "use-immer": "^0.8.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

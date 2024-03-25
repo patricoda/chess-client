@@ -102,6 +102,7 @@ const OnlineGame = () => {
                 handleMovePiece={handleMovePiece}
                 handlePromotePiece={handlePromotePiece}
                 playerAllegiance={gameState.clientPlayer.allegiance}
+                flipPerspectiveForBlack={true}
               />
               <WidgetContainer className="footer">
                 <PlayerProfile player={gameState.clientPlayer} />
