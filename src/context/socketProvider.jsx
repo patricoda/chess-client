@@ -12,7 +12,11 @@ export const SocketContextProvider = ({ children }) => {
   const [usernameRequired, setUsernameRequired] = useState(false);
   const [networkError, setNetworkError] = useState(null);
 
-  const socket = useRef(io("localhost:3001", { autoConnect: false }));
+  const socket = useRef(
+    io(process.env.SOCKET_URI || "localhost:3001", {
+      autoConnect: false,
+    })
+  );
 
   const handlePostEvent = useCallback((eventType, data) => {
     socket.current.emit(eventType, data);
