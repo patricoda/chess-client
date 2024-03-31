@@ -12,8 +12,11 @@ export const SocketContextProvider = ({ children }) => {
   const [usernameRequired, setUsernameRequired] = useState(false);
   const [networkError, setNetworkError] = useState(null);
 
+  const socketUri =
+    import.meta.env.PROD && SOCKET_URI ? SOCKET_URI : "localhost:3001";
+
   const socket = useRef(
-    io(process.env.SOCKET_URI || "localhost:3001", {
+    io(socketUri, {
       autoConnect: false,
     })
   );
