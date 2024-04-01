@@ -9,7 +9,7 @@ export const useGameState = () => {
     const gameState = gameRef.current.getGameState();
     setGameState({
       ...gameState,
-      boardState: JSON.parse(gameState.boardState),
+      boardState: gameState.board,
     });
   }, []);
 

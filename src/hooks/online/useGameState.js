@@ -26,14 +26,14 @@ export const useGameState = () => {
 
           return {
             ...newGameState,
-            boardState: JSON.parse(newGameState.boardState),
+            boardState: JSON.parse(newGameState.board),
             clientPlayer,
             isAwaitingGame: false,
           };
         case "GAME_STATE_UPDATED":
           return {
             ...action.gameState,
-            boardState: JSON.parse(action.gameState.boardState),
+            boardState: JSON.parse(action.gameState.board),
             //ensure we retain any non-changing values from initial game status
             isAwaitingGame: false,
             players: gameState.players,
