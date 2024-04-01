@@ -118,7 +118,7 @@ const ChessBoard = ({
   return (
     <table className={`chessboard ${shouldFlipBoard ? "flip" : ""}`}>
       <tbody>
-        {boardState.tiles.map((tiles, i) => (
+        {boardState.map((tiles, i) => (
           <Row
             key={i}
             tiles={tiles}
