@@ -26,6 +26,9 @@ export const Game = ({
           legalMoves={gameState.legalMoves}
           isPlayersTurn={isPlayersTurn}
           flipPerspectiveForBlack={flipPerspectiveForBlack}
+          latestMove={
+            gameState.moveHistory[gameState.moveHistory.length - 1] ?? {}
+          }
         />
       )}
     </>

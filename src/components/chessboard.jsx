@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { PieceType, Allegiance } from "@patricoda/chess-engine";
 import { Pawn, Rook, Knight, Bishop, King, Queen } from "./piece";
+import classNames from "classnames";
 
 const renderPiece = ({ type, allegiance }) => {
   switch (type) {
@@ -48,6 +49,7 @@ const Tile = ({
   playerAllegiance,
   moveHandler,
   legalMoves,
+  latestMove,
   ...props
 }) => {
   const isValidMoveTile =
@@ -55,9 +57,15 @@ const Tile = ({
       (coords) => coords === tile.notation
     ) ?? false;
 
+  const isLatestMoveTile =
+    tile.notation === latestMove.from || tile.notation === latestMove.to;
+
   return (
     <td
-      className={isValidMoveTile ? "validMoveTile" : ""}
+      className={classNames({
+        validMoveTile: isValidMoveTile,
+        latestMoveTile: isLatestMoveTile,
+      })}
       onClick={() => isValidMoveTile && moveHandler(tile)}
       id={`${tile.notation}`}
     >

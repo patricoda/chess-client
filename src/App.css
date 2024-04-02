@@ -102,12 +102,22 @@ button {
     opacity: 0.5;
   }
 
+  
+
   tr:nth-child(odd) td:nth-child(odd), tr:nth-child(even) td:nth-child(even) {
     background-color: #f5deb3d9;
+
+    &.latestMoveTile {
+      background-color: #def259db;
+    }
   }
 
   tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
     background-color: #6b8e23cf;
+
+    &.latestMoveTile {
+      background-color: #e4a019e3;
+    }
   }
 
   td {

@@ -82,7 +82,7 @@ const OnlineGame = () => {
       <NewUserDialog handleSubmit={handleSubmit} isVisible={usernameRequired} />
       {gameState.isAwaitingGame ? (
         <Dialog isVisible={gameState.isAwaitingGame}>
-          <p>Please wait...</p>
+          <p>Finding an opponent...</p>
           <LeaveButton onClick={handleLeave} />
         </Dialog>
       ) : (
